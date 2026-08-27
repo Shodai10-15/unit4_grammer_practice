@@ -1,0 +1,434 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Space+Grotesk:wght@600;700;800&display=swap');
+
+:root {
+  --paper: #f4f6fb;
+  --panel: #ffffff;
+
+  --text: #0f172a;
+  --text-muted: #334155;
+
+  --blue: #4f46e5;
+  --blue-dark: #3730a3;
+  --blue-bg: #e0e7ff;
+
+  --purple: #7c3aed;
+  --purple-dark: #5b21b6;
+  --purple-bg: #ede9fe;
+
+  --orange: #ea580c;
+  --orange-dark: #b45309;
+  --orange-bg: #ffedd5;
+
+  --green: #16a34a;
+  --green-dark: #166534;
+  --green-bg: #dcfce7;
+
+  --red: #dc2626;
+  --red-dark: #991b1b;
+  --red-bg: #fee2e2;
+
+  --ink: #0f172a;
+  --line: #dbe0ea;
+  --focus: #4f46e5;
+
+  --ok: var(--green);
+  --ok-dark: var(--green-dark);
+  --ok-bg: var(--green-bg);
+  --warn: var(--orange-dark);
+  --warn-bg: var(--orange-bg);
+  --danger: var(--red);
+  --danger-dark: var(--red-dark);
+  --danger-bg: var(--red-bg);
+
+  --text-primary: var(--text);
+  --text-secondary: var(--text-muted);
+  --bg-accent: var(--blue-bg);
+  --muted: var(--text-muted);
+
+  --font-jp: "Zen Maru Gothic", "Hiragino Sans", sans-serif;
+  --font-display: "Space Grotesk", "Zen Maru Gothic", sans-serif;
+  --font-mono: "Space Grotesk", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--paper);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-jp);
+  background: linear-gradient(180deg, #eef1ff 0%, #f4f6fb 340px, #f4f6fb 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  font-size: 16.5px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font-family: var(--font-jp);
+}
+
+:focus-visible {
+  outline: 4px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+  min-height: 100vh;
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+  padding-bottom: 18px;
+  gap: 12px;
+  border-bottom: 4px solid;
+  border-image: linear-gradient(90deg, var(--blue), var(--purple), var(--orange)) 1;
+}
+
+.header h1 {
+  font-family: var(--font-jp);
+  font-size: 27px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  margin: 0;
+  color: var(--text);
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--panel);
+  border: none;
+  border-radius: 24px;
+  padding: 26px;
+  margin-bottom: 20px;
+  box-shadow: 0 14px 34px rgba(79, 70, 229, 0.1), 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+/* ---------- Buttons: 押せる立体感（Duolingo風） ---------- */
+.btn {
+  display: inline-block;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 15px 28px;
+  min-height: 52px;
+  font-size: 16px;
+  font-weight: 800;
+  font-family: var(--font-jp);
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 5px 0 var(--blue-dark);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--blue-dark);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn.secondary {
+  background: #fff;
+  color: var(--text);
+  border: 2px solid var(--line);
+  box-shadow: 0 4px 0 var(--line);
+}
+.btn.secondary:hover:not(:disabled) {
+  border-color: var(--blue);
+}
+.btn.secondary:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.btn.danger {
+  background: var(--red);
+  box-shadow: 0 5px 0 var(--red-dark);
+}
+.btn.danger:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--red-dark);
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Inputs ---------- */
+input[type="text"],
+input[type="password"],
+select,
+textarea {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  margin-bottom: 14px;
+  background: #fbfcff;
+  color: var(--text);
+  font-family: var(--font-jp);
+  min-height: 52px;
+}
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--blue);
+  background: #fff;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 800;
+}
+
+/* ---------- Grid of tiles ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 18px;
+}
+
+.tile {
+  background: var(--panel);
+  border: none;
+  border-top: 8px solid var(--blue);
+  border-radius: 20px;
+  padding: 24px 18px;
+  min-height: 100px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.12), 0 2px 6px rgba(15, 23, 42, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.grid .tile:nth-child(3n+1) { border-top-color: var(--blue); background: var(--blue-bg); }
+.grid .tile:nth-child(3n+2) { border-top-color: var(--purple); background: var(--purple-bg); }
+.grid .tile:nth-child(3n+3) { border-top-color: var(--orange); background: var(--orange-bg); }
+
+.grid .tile:nth-child(3n+1) > div:first-child { color: var(--blue-dark); }
+.grid .tile:nth-child(3n+2) > div:first-child { color: var(--purple-dark); }
+.grid .tile:nth-child(3n+3) > div:first-child { color: var(--orange-dark); }
+
+.tile > div:first-child {
+  font-family: var(--font-jp);
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.grid .tile:nth-child(3n+1):hover { box-shadow: 0 16px 32px rgba(79, 70, 229, 0.28); }
+.grid .tile:nth-child(3n+2):hover { box-shadow: 0 16px 32px rgba(124, 58, 237, 0.28); }
+.grid .tile:nth-child(3n+3):hover { box-shadow: 0 16px 32px rgba(234, 88, 12, 0.28); }
+
+.tile:hover {
+  transform: translateY(-4px);
+}
+
+.tile.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.tile .big {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+/* ---------- Badges: 塗りつぶしで力強く、記号も併用 ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 800;
+  padding: 6px 15px;
+  border-radius: 999px;
+  margin-top: 12px;
+}
+
+.badge.passed {
+  background: var(--ok);
+  color: #fff;
+}
+.badge.passed::before { content: "✓"; }
+
+.badge.in_progress {
+  background: var(--orange);
+  color: #fff;
+}
+.badge.in_progress::before { content: "●"; font-size: 9px; }
+
+.badge.none {
+  background: #94a3b8;
+  color: #fff;
+}
+.badge.none::before { content: "○"; font-size: 10px; }
+
+/* ---------- Choice buttons ---------- */
+.choice {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 17px 18px;
+  margin-bottom: 12px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-jp);
+  color: var(--text);
+  cursor: pointer;
+  min-height: 52px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+}
+.choice:hover {
+  border-color: var(--blue);
+  background: var(--blue-bg);
+  transform: translateY(-1px);
+}
+
+.choice.selected {
+  border-color: var(--blue);
+  border-width: 3px;
+  background: var(--blue-bg);
+  font-weight: 800;
+}
+
+.choice.correct {
+  border-color: var(--ok);
+  border-width: 3px;
+  background: var(--ok-bg);
+  font-weight: 800;
+}
+.choice.correct::after { content: "  ✓ 正解"; color: var(--ok-dark); }
+
+.choice.incorrect {
+  border-color: var(--danger);
+  border-width: 3px;
+  background: var(--danger-bg);
+}
+.choice.incorrect::after { content: "  ✕"; color: var(--danger-dark); }
+
+/* ---------- Progress bar ---------- */
+.progress-bar {
+  height: 14px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.progress-bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
+
+/* ---------- Floating help button ---------- */
+.help-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 16px 24px;
+  min-height: 52px;
+  font-weight: 800;
+  font-size: 15px;
+  font-family: var(--font-jp);
+  box-shadow: 0 5px 0 var(--orange-dark), 0 10px 24px rgba(234, 88, 12, 0.3);
+  cursor: pointer;
+  z-index: 40;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.help-fab:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--orange-dark);
+}
+
+/* ---------- Dashboard table ---------- */
+table.dash {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 13.5px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+table.dash th,
+table.dash td {
+  border-bottom: 1.5px solid var(--line);
+  padding: 10px 10px;
+  text-align: center;
+}
+
+table.dash th {
+  background: var(--ink);
+  color: #fff;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+table.dash tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ---------- Section titles: レタリング系の太字見出し ---------- */
+.section-title {
+  font-family: var(--font-jp);
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  margin: 0 0 6px;
+}
