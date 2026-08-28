@@ -162,7 +162,7 @@ export default function TypeThenSpeak({ questions, onFinish }) {
                 <p>
                   {writeResult.correct
                     ? "✅ 正解！"
-                    : `一致度 ${writeResult.accuracy}%（正解: ${q.english}）`}
+                    : `❌ まだ100%ではありません（一致度 ${writeResult.accuracy}%）。もう一度書いてみよう`}
                 </p>
                 <div className="btn-row">
                   {!writeResult.correct && (
@@ -170,9 +170,11 @@ export default function TypeThenSpeak({ questions, onFinish }) {
                       もう一度書く
                     </button>
                   )}
-                  <button className="btn" onClick={goToSpeak}>
-                    発話練習へ進む
-                  </button>
+                  {writeResult.correct && (
+                    <button className="btn" onClick={goToSpeak}>
+                      発話練習へ進む
+                    </button>
+                  )}
                 </div>
               </div>
             )}
