@@ -1,0 +1,288 @@
+diff --git a/pages/answers/[slug].js b/pages/answers/[slug].js
+index b25adba..65e3eba 100644
+--- a/pages/answers/[slug].js
++++ b/pages/answers/[slug].js
+@@ -1,7 +1,138 @@
+ import { useRouter } from "next/router";
+ 
+ const SETS = {
+-  // Unit4のワークシートを作るときに、ここに音声・答えのセットを追加します。
++  "g1-step1-answers": {
++    title: "G1 Step1　こたえ合わせ",
++    sections: [
++      { label: "① Listening", lines: ["① 図書室", "② プール", "③ 教室", "④ 下駄箱", "⑤ 体育館"] },
++      { label: "② Reading", lines: ["① A", "② A", "③ A", "④ A"] },
++      { label: "③ Writing", lines: ["① must", "② mustn't", "③ must", "④ mustn't", "⑤ mustn't"] },
++    ],
++  },
++  "g2-step1-answers": {
++    title: "G2 Step1　こたえ合わせ",
++    sections: [
++      { label: "① Listening", lines: ["① 持ち物", "② 集合時間", "③ 部屋割り", "④ しおり", "⑤ お小遣い"] },
++      { label: "② Reading", lines: ["① A", "② A", "③ A", "④ A"] },
++      { label: "③ Writing", lines: ["① have to", "② don't have to", "③ have to", "④ don't have to", "⑤ has to"] },
++    ],
++  },
++  "g3-step1-answers": {
++    title: "G3 Step1　こたえ合わせ",
++    sections: [
++      { label: "① Listening", lines: ["① サッカー部", "② 美術部", "③ 科学部", "④ 園芸部", "⑤ 合唱部"] },
++      { label: "② Reading", lines: ["① A", "② A", "③ A", "④ A"] },
++      { label: "③ Writing", lines: ["① practicing", "② painting", "③ playing", "④ watering", "⑤ singing"] },
++    ],
++  },
++  "g4-step1-answers": {
++    title: "G4 Step1　こたえ合わせ",
++    sections: [
++      { label: "① Listening", lines: ["① 部活", "② 勉強", "③ 友達", "④ 時間管理", "⑤ 挑戦"] },
++      { label: "② Reading", lines: ["① A", "② A", "③ A", "④ A"] },
++      { label: "③ Writing", lines: ["① Joining", "② Studying", "③ Being", "④ Asking", "⑤ Trying"] },
++    ],
++  },
++  "g1-step2-answers": {
++    title: "G1 Step2　こたえ合わせ",
++    sections: [
++      {
++        label: "① 英作文",
++        lines: [
++          "① You mustn't run in the gym.",
++          "② You must change your shoes at the shoe lockers.",
++          "③ You mustn't use your smartphone during class.",
++          "④ You must bring your student handbook every day.",
++          "⑤ You mustn't leave the school without permission.",
++        ],
++      },
++      {
++        label: "② ディクテーション",
++        lines: [
++          "① You must be quiet in the library.",
++          "② You mustn't eat food in the classroom.",
++          "③ We must clean our classroom every day.",
++          "④ You mustn't run in the hallway.",
++          "⑤ You must wear your school uniform.",
++        ],
++      },
++    ],
++  },
++  "g2-step2-answers": {
++    title: "G2 Step2　こたえ合わせ",
++    sections: [
++      {
++        label: "① 英作文",
++        lines: [
++          "① You have to bring a rain coat for the trip.",
++          "② You don't have to bring your own pillow. The hotel has one.",
++          "③ We have to finish packing by Thursday night.",
++          "④ You don't have to worry about food. Everything is included.",
++          "⑤ You have to bring a name tag for the trip.",
++        ],
++      },
++      {
++        label: "② ディクテーション",
++        lines: [
++          "① You have to bring a rain coat for the school trip.",
++          "② You don't have to bring your own pillow.",
++          "③ We have to arrive at the station by seven.",
++          "④ You don't have to worry about food during the trip.",
++          "⑤ She has to finish packing tonight.",
++        ],
++      },
++    ],
++  },
++  "g3-step2-answers": {
++    title: "G3 Step2　こたえ合わせ",
++    sections: [
++      {
++        label: "① 英作文",
++        lines: [
++          "① I enjoy practicing soccer every day after school.",
++          "② I finished painting the poster for the festival.",
++          "③ I practice playing the drums every night.",
++          "④ We stop watering the flowers when it rains.",
++          "⑤ My friend gave up singing in the chorus.",
++        ],
++      },
++      {
++        label: "② ディクテーション",
++        lines: [
++          "① I enjoy practicing basketball with my club members.",
++          "② She finished decorating the classroom for the festival.",
++          "③ He practices playing the trumpet every morning.",
++          "④ We stopped cleaning the garden because it got dark.",
++          "⑤ My brother gave up playing baseball last year.",
++        ],
++      },
++    ],
++  },
++  "g4-step2-answers": {
++    title: "G4 Step2　こたえ合わせ",
++    sections: [
++      {
++        label: "① 英作文",
++        lines: [
++          "① Joining a club is a great way to make friends.",
++          "② Studying a little every day is more effective than studying once a week.",
++          "③ Being kind to others makes school life better.",
++          "④ Asking questions when you don't understand is important.",
++          "⑤ Trying new things without fear is exciting.",
++        ],
++      },
++      {
++        label: "② ディクテーション",
++        lines: [
++          "① Playing a sport is good for your health.",
++          "② Reading every night before bed is a good habit.",
++          "③ Helping your classmates is important.",
++          "④ Speaking up in class takes courage.",
++          "⑤ Making mistakes is a natural part of learning.",
++        ],
++      },
++    ],
++  },
+ };
+ 
+ export default function AnswerPage() {
+diff --git a/pages/listen/[slug].js b/pages/listen/[slug].js
+index 07b054b..75f6e90 100644
+--- a/pages/listen/[slug].js
++++ b/pages/listen/[slug].js
+@@ -5,7 +5,138 @@ import AudioPlayer from "../../components/AudioPlayer";
+ // hidden: 英文を表示しない（ディクテーション・リスニング用）
+ // visible: 英文を表示する（発音確認用）
+ const SETS = {
+-  // Unit4のワークシートを作るときに、ここに音声・答えのセットを追加します。
++  "g1-step1": {
++    title: "G1 Step1　リスニング",
++    hidden: true,
++    items: [
++      "You must be quiet in the library.",
++      "You must wear a swimming cap when you use the pool.",
++      "You must not eat food in the classroom.",
++      "You must change your shoes at the shoe lockers.",
++      "You must not run in the gym during class.",
++    ],
++  },
++  "g2-step1": {
++    title: "G2 Step1　リスニング",
++    hidden: true,
++    items: [
++      "You have to bring a rain coat for the trip.",
++      "We have to arrive at the station by seven in the morning.",
++      "You don't have to choose your own room. The teacher already decided.",
++      "You have to read the whole schedule book before the trip.",
++      "You don't have to bring a lot of money. One thousand yen is enough.",
++    ],
++  },
++  "g3-step1": {
++    title: "G3 Step1　リスニング",
++    hidden: true,
++    items: [
++      "I enjoy practicing soccer with my teammates every day.",
++      "She finished painting a big poster for the school festival.",
++      "He practices mixing chemicals carefully in the science club.",
++      "We stopped watering the flowers because it started raining.",
++      "My sister gave up singing in the chorus because of her cold.",
++    ],
++  },
++  "g4-step1": {
++    title: "G4 Step1　リスニング",
++    hidden: true,
++    items: [
++      "Joining a school club is a lot of fun.",
++      "Studying every day little by little really helps.",
++      "Making new friends in April is exciting.",
++      "Managing your time well is important in junior high.",
++      "Trying something new can be scary but exciting.",
++    ],
++  },
++  "g1-step2-dictation": {
++    title: "G1 Step2　ディクテーション",
++    hidden: true,
++    items: [
++      "You must be quiet in the library.",
++      "You mustn't eat food in the classroom.",
++      "We must clean our classroom every day.",
++      "You mustn't run in the hallway.",
++      "You must wear your school uniform.",
++    ],
++  },
++  "g2-step2-dictation": {
++    title: "G2 Step2　ディクテーション",
++    hidden: true,
++    items: [
++      "You have to bring a rain coat for the school trip.",
++      "You don't have to bring your own pillow.",
++      "We have to arrive at the station by seven.",
++      "You don't have to worry about food during the trip.",
++      "She has to finish packing tonight.",
++    ],
++  },
++  "g3-step2-dictation": {
++    title: "G3 Step2　ディクテーション",
++    hidden: true,
++    items: [
++      "I enjoy practicing basketball with my club members.",
++      "She finished decorating the classroom for the festival.",
++      "He practices playing the trumpet every morning.",
++      "We stopped cleaning the garden because it got dark.",
++      "My brother gave up playing baseball last year.",
++    ],
++  },
++  "g4-step2-dictation": {
++    title: "G4 Step2　ディクテーション",
++    hidden: true,
++    items: [
++      "Playing a sport is good for your health.",
++      "Reading every night before bed is a good habit.",
++      "Helping your classmates is important.",
++      "Speaking up in class takes courage.",
++      "Making mistakes is a natural part of learning.",
++    ],
++  },
++  "g1-step2-pronounce": {
++    title: "G1 Step2　発音確認",
++    hidden: false,
++    items: [
++      "You mustn't run in the gym.",
++      "You must change your shoes at the shoe lockers.",
++      "You mustn't use your smartphone during class.",
++      "You must bring your student handbook every day.",
++      "You mustn't leave the school without permission.",
++    ],
++  },
++  "g2-step2-pronounce": {
++    title: "G2 Step2　発音確認",
++    hidden: false,
++    items: [
++      "You have to bring a rain coat for the trip.",
++      "You don't have to bring your own pillow. The hotel has one.",
++      "We have to finish packing by Thursday night.",
++      "You don't have to worry about food. Everything is included.",
++      "You have to bring a name tag for the trip.",
++    ],
++  },
++  "g3-step2-pronounce": {
++    title: "G3 Step2　発音確認",
++    hidden: false,
++    items: [
++      "I enjoy practicing soccer every day after school.",
++      "I finished painting the poster for the festival.",
++      "I practice playing the drums every night.",
++      "We stop watering the flowers when it rains.",
++      "My friend gave up singing in the chorus.",
++    ],
++  },
++  "g4-step2-pronounce": {
++    title: "G4 Step2　発音確認",
++    hidden: false,
++    items: [
++      "Joining a club is a great way to make friends.",
++      "Studying a little every day is more effective than studying once a week.",
++      "Being kind to others makes school life better.",
++      "Asking questions when you don't understand is important.",
++      "Trying new things without fear is exciting.",
++    ],
++  },
+ };
+ 
+ export default function ListenPage() {
