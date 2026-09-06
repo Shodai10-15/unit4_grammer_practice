@@ -25,7 +25,6 @@ const LISTENING_INSTRUCTIONS = {
 };
 
 const STEP1_SKILLS = [
-  { key: "L", label: <><Icon name="headphones" /> Listening</>, desc: "音声を聞いて選ぶ" },
   { key: "R", label: <><Icon name="book" /> Reading</>, desc: "読んで意味を選ぶ" },
   { key: "W", label: <><Icon name="pencil" /> Writing</>, desc: "穴埋めをタイプする" },
 ];
@@ -291,7 +290,17 @@ export default function GrammarPage() {
         <TypeThenSpeak questions={typeSpeakQuestions} onFinish={handleQuizFinish} />
       )}
 
-      {mode && mode.step === 3 && (
+      {mode && mode.step === 3 && !result && STEP3_CONFIG[grammar] && (
+        <RulesTask
+          config={STEP3_CONFIG[grammar]}
+          onSubmit={async (text) => {
+            await saveProgress(3, null, "passed", null, null, text);
+            setResult({ done: true });
+          }}
+        />
+      )}
+
+      {mode && mode.step === 3 && !STEP3_CONFIG[grammar] && (
         <div className="card">
           <p className="section-title">準備中</p>
           <p className="muted">
@@ -345,50 +354,28 @@ export default function GrammarPage() {
 }
 
 const STEP3_CONFIG = {
-  G1: {
-    title: "わたしの説明書",
-    themeHint: "好きなこと・得意なことを1つ決めよう（部活、趣味、ペット、ゲームなど）",
-    frames: [
-      "I know how to ___.",
-      "I don't know what to ___.",
-      "Do you know where to ___?",
-      "I wonder who to ___.",
-      "Please remember when to ___.",
-    ],
-    guiding: [
-      "なぜ好き・得意なの？",
-      "いつから始めた？",
-      "どんなエピソードがある？",
-      "これからどうしたい？",
-    ],
-    example:
-      "I like basketball. I know how to shoot well. I don't know what to do when I miss. I practice every day.",
-  },
-  G2: {
-    title: "先輩からのアドバイスカード",
-    themeHint: "後輩（1年生など）にアドバイスするつもりでテーマを1つ決めよう",
-    frames: [
-      "I'll show you how to ___.",
-      "I'll tell you what to ___ when ___.",
-      "Can you teach me where to ___?",
-      "My friend showed me who to ___.",
-      "I'll teach you when to ___.",
-    ],
-    guiding: [
-      "何が得意で教えたいの？",
-      "いつ困る場面が多い？",
-      "自分も最初は苦労した？",
-      "どんな気持ちで伝えたい？",
+  U4G1: {
+    title: "理想の学校ルールメーカー",
+    instruction:
+      "「これがあったらもっと過ごしやすいのに」という学校・クラスのルールを、must / mustn'tを使って5つ考えて英語で書こう。",
+    wordBank: [
+      "be quiet",
+      "be on time",
+      "bring your textbook",
+      "do your homework",
+      "wear the school uniform",
+      "use your phone in class",
+      "run in the hallway",
+      "eat in the classroom",
+      "help each other",
+      "clean the classroom",
+      "talk during a test",
+      "take pictures without asking",
     ],
     example:
-      "I'm good at cooking. I'll show you how to cut vegetables. I'll tell you what to do when the pan is hot. Cooking is fun for me.",
+      "Students must help each other. Students mustn't use their phones in class.",
   },
 };
-
-const COPILOT_PROMPT = `あなたは中学2年生の英語学習をサポートするアシスタントです。
-以下の英文について、文法的な間違いがあれば指摘し、より自然な表現があれば提案してください。
-ただし、書き直した文章は私に伝えるだけにして、あなたが直接答えを完成させないでください。
-英文：（ここに自分の文章を貼る）`;
 
 function UnlockGate({ grammar, step, onUnlocked, inline }) {
   const [code, setCode] = useState("");
@@ -444,28 +431,23 @@ function UnlockGate({ grammar, step, onUnlocked, inline }) {
   return <div className="card">{content}</div>;
 }
 
-function Step3Form({ grammar, onSubmit }) {
-  const config = STEP3_CONFIG[grammar];
-  const [theme, setTheme] = useState("");
-  const [draft, setDraft] = useState("");
-  const [usedCopilot, setUsedCopilot] = useState(false);
-  const [revised, setRevised] = useState("");
+function RulesTask({ config, onSubmit }) {
+  const [rules, setRules] = useState(["", "", "", "", ""]);
   const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = theme.trim() && draft.trim() && (!usedCopilot || revised.trim());
+  function updateRule(i, val) {
+    const next = [...rules];
+    next[i] = val;
+    setRules(next);
+  }
+
+  const filledCount = rules.filter((r) => r.trim()).length;
+  const canSubmit = filledCount >= 5;
 
   return (
     <div className="card">
       <p className="section-title" style={{ fontSize: 22 }}>{config.title}</p>
-      <p className="muted">{config.themeHint}</p>
-
-      <label>テーマ</label>
-      <input
-        type="text"
-        placeholder="例：バスケットボール、料理、飼っているねこ"
-        value={theme}
-        onChange={(e) => setTheme(e.target.value)}
-      />
+      <p className="muted">{config.instruction}</p>
 
       <div
         style={{
@@ -475,92 +457,56 @@ function Step3Form({ grammar, onSubmit }) {
           marginBottom: 12,
         }}
       >
-        <p className="section-title" style={{ fontSize: 16 }}>使える型（2つ以上使おう）</p>
-        {config.frames.map((f, i) => (
-          <p key={i} style={{ margin: "2px 0", fontFamily: "monospace" }}>
-            ・{f}
-          </p>
-        ))}
-      </div>
-
-      <div
-        style={{
-          background: "#fdf1dc",
-          borderRadius: 10,
-          padding: "10px 14px",
-          marginBottom: 12,
-        }}
-      >
         <p className="section-title" style={{ fontSize: 16 }}>
-          💡 何を書けばいいか迷ったら（ヒント・書かなくてもOK）
+          使える単語・表現（ワークシートと同じもの）
         </p>
-        {config.guiding.map((g, i) => (
-          <p key={i} style={{ margin: "2px 0" }}>
-            ・{g}
-          </p>
-        ))}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {config.wordBank.map((w, i) => (
+            <span
+              key={i}
+              style={{
+                background: "#fff",
+                border: "1px solid #cfe0dd",
+                borderRadius: 999,
+                padding: "3px 10px",
+                fontSize: 13,
+              }}
+            >
+              {w}
+            </span>
+          ))}
+        </div>
       </div>
 
-      <p className="muted">例（3〜4文）：{config.example}</p>
+      <p className="muted">例：{config.example}</p>
 
-      <label>下書き（3〜4文）</label>
-      <textarea
-        rows={4}
-        style={{ width: "100%", padding: 12, fontSize: 15, borderRadius: 8, border: "1px solid #d3dde0", marginBottom: 12 }}
-        placeholder="ここに自分の文章を書こう"
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-      />
-
-      <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+      <label>あなたが考える理想の学校・クラスのルールを5つ、英語で書こう</label>
+      {rules.map((r, i) => (
         <input
-          type="checkbox"
-          checked={usedCopilot}
-          onChange={(e) => setUsedCopilot(e.target.checked)}
-          style={{ width: 20, height: 20 }}
+          key={i}
+          type="text"
+          placeholder={`${i + 1}. 例：Students must ...`}
+          value={r}
+          onChange={(e) => updateRule(i, e.target.value)}
+          style={{
+            width: "100%",
+            padding: 10,
+            fontSize: 15,
+            borderRadius: 8,
+            border: "1px solid #d3dde0",
+            marginBottom: 8,
+          }}
         />
-        Copilotに相談して改善した
-      </label>
-
-      {usedCopilot && (
-        <>
-          <div
-            style={{
-              background: "#f4f7f6",
-              borderRadius: 10,
-              padding: "10px 14px",
-              marginBottom: 8,
-              fontSize: 13,
-              whiteSpace: "pre-wrap",
-              fontFamily: "monospace",
-            }}
-          >
-            {COPILOT_PROMPT}
-          </div>
-          <label>改善後の文章</label>
-          <textarea
-            rows={4}
-            style={{ width: "100%", padding: 12, fontSize: 15, borderRadius: 8, border: "1px solid #d3dde0", marginBottom: 12 }}
-            placeholder="Copilotに相談したあとの文章を貼ろう"
-            value={revised}
-            onChange={(e) => setRevised(e.target.value)}
-          />
-        </>
-      )}
+      ))}
+      <p className="muted" style={{ fontSize: 13 }}>{filledCount} / 5 個 入力済み</p>
 
       <button
         className="btn"
         disabled={!canSubmit || submitting}
         onClick={async () => {
           setSubmitting(true);
-          const parts = [
-            `[テーマ] ${theme.trim()}`,
-            `[下書き]\n${draft.trim()}`,
-          ];
-          if (usedCopilot && revised.trim()) {
-            parts.push(`[Copilot改善後]\n${revised.trim()}`);
-          }
-          await onSubmit(parts.join("\n\n"));
+          const text = rules.map((r, i) => `${i + 1}. ${r.trim()}`).join("\n");
+          await onSubmit(text);
           setSubmitting(false);
         }}
       >

@@ -11,6 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registeredMsg, setRegisteredMsg] = useState(false);
 
   useEffect(() => {
     const existing = getSession();
@@ -54,8 +55,8 @@ export default function Login() {
       setError("出席番号を選んでください");
       return;
     }
-    if (!password) {
-      setError("パスワードを入力してください");
+    if (!/^\d{4}$/.test(password.trim())) {
+      setError("パスワードは4桁の数字で入力してください");
       return;
     }
     setLoading(true);
@@ -63,12 +64,20 @@ export default function Login() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ seatNumber, password }),
+        body: JSON.stringify({ seatNumber, password: password.trim() }),
       });
       const data = await res.json();
       if (!data.ok) {
         setError(data.error || "ログインに失敗しました");
         setLoading(false);
+        return;
+      }
+      if (data.registered) {
+        setRegisteredMsg(true);
+        setTimeout(() => {
+          saveSession(seatNumber, data.name);
+          router.push("/select");
+        }, 1400);
         return;
       }
       saveSession(seatNumber, data.name);
@@ -132,18 +141,27 @@ export default function Login() {
               ))}
             </select>
 
-            <label htmlFor="pw">パスワード</label>
+            <label htmlFor="pw">パスワード（4桁の数字）</label>
+            <p className="muted" style={{ fontSize: 13, marginTop: -4, marginBottom: 6 }}>
+              初めての人は、これから使うパスワードとして4桁の数字（誕生日など）を決めて入力しよう。次回からは同じ数字でログインできます。
+            </p>
             <input
               id="pw"
               type="password"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={4}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="先生に配布されたパスワードを入力"
+              onChange={(e) => setPassword(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
+              placeholder="例：0512"
             />
 
             {error && <p style={{ color: "#c0392b" }}>{error}</p>}
+            {registeredMsg && (
+              <p style={{ color: "#2f7d4f" }}>パスワードを登録したよ！これから始めよう。</p>
+            )}
 
-            <button className="btn" type="submit" disabled={loading}>
+            <button className="btn" type="submit" disabled={loading || registeredMsg}>
               {loading ? "確認中..." : "ログイン"}
             </button>
           </form>
