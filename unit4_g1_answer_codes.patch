@@ -1,0 +1,64 @@
+diff --git a/pages/answers/[slug].js b/pages/answers/[slug].js
+index fa205c3..0a02adf 100644
+--- a/pages/answers/[slug].js
++++ b/pages/answers/[slug].js
+@@ -3,10 +3,10 @@ import { useRouter } from "next/router";
+ const SETS = {
+   "g1-step1-answers": {
+     title: "G1 Step1　こたえ合わせ",
++    code: "SCHOOLRULE1",
+     sections: [
+-      { label: "① Listening", lines: ["① 図書館", "② プール", "③ 教室", "④ 駅", "⑤ 体育館"] },
+-      { label: "② Reading", lines: ["① A", "② A", "③ A", "④ A"] },
+-      { label: "③ Writing", lines: ["① must", "② mustn't", "③ must", "④ mustn't", "⑤ must"] },
++      { label: "① Reading", lines: ["① A", "② A", "③ A", "④ A"] },
++      { label: "② Writing", lines: ["① must", "② mustn't", "③ must", "④ mustn't", "⑤ must"] },
+     ],
+   },
+   "g2-step1-answers": {
+@@ -35,6 +35,7 @@ const SETS = {
+   },
+   "g1-step2-answers": {
+     title: "G1 Step2　こたえ合わせ",
++    code: "SCHOOLRULE2",
+     sections: [
+       {
+         label: "① 英作文",
+@@ -133,6 +134,10 @@ const SETS = {
+       },
+     ],
+   },
++  "g1-step3-code": {
++    title: "G1 Step3　解放コード",
++    code: "BONUS1",
++  },
+ };
+ 
+ export default function AnswerPage() {
+@@ -156,7 +161,7 @@ export default function AnswerPage() {
+       <div className="header">
+         <h1>{set.title}</h1>
+       </div>
+-      {set.sections.map((sec, i) => (
++      {(set.sections || []).map((sec, i) => (
+         <div className="card" key={i}>
+           <p className="section-title">{sec.label}</p>
+           {sec.lines.map((l, j) => (
+@@ -166,6 +171,17 @@ export default function AnswerPage() {
+           ))}
+         </div>
+       ))}
++      {set.code && (
++        <div
++          className="card"
++          style={{ background: "#eaf4f2", border: "1px solid #cfe0dd" }}
++        >
++          <p className="section-title">OKだったら、この合言葉をアプリに入力しよう</p>
++          <p style={{ fontSize: 26, fontWeight: "bold", color: "#c0392b", margin: "6px 0 0" }}>
++            {set.code}
++          </p>
++        </div>
++      )}
+     </div>
+   );
+ }
