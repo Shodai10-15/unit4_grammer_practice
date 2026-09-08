@@ -73,6 +73,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "どうする", jp: "起きなければならない", en: "must get up" },
                 { role: "いつ", jp: "毎朝6時に", en: "at six every morning" },
               ],
+              hints: [
+                "語順は「私は／起きなければならない／毎朝6時に」の順だよ！",
+                "「〜しなければならない」なのでmustを使うよ。",
+                "時刻には at を使うよ（at six）。「毎朝」は every morning。",
+              ],
             },
             {
               a: "② You mustn't take pictures here.",
@@ -83,6 +88,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "何を", jp: "写真を", en: "pictures" },
                 { role: "どこ", jp: "ここで", en: "here" },
               ],
+              hints: [
+                "語順は「（あなたは）／撮ってはいけない／写真を／ここで」の順だよ！",
+                "「〜してはいけない」なのでmustn'tを使うよ。",
+                "「ここで」は here。場所を表す言葉は文の最後につけよう。",
+              ],
             },
             {
               a: "③ We mustn't run in the hallway.",
@@ -91,6 +101,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "誰は", jp: "私たちは", en: "We" },
                 { role: "どうする", jp: "走ってはいけない", en: "mustn't run" },
                 { role: "どこ", jp: "廊下で", en: "in the hallway" },
+              ],
+              hints: [
+                "語順は「私たちは／走ってはいけない／廊下で」の順だよ！",
+                "主語がWeでもmustn'tの形は変わらないよ。",
+                "「廊下を」だけど、英語では「廊下の中で」というイメージで in the hallway だよ。",
               ],
             },
             {
@@ -102,6 +117,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "何を", jp: "この本を", en: "this book" },
                 { role: "いつ", jp: "今日", en: "today" },
               ],
+              hints: [
+                "語順は「彼は／返さなければならない／この本を／今日」の順だよ！",
+                "主語が三人称でもmustはそのままmustだよ。",
+                "「今日」は today。時を表す言葉は文の最後につけよう。",
+              ],
             },
             {
               a: "⑤ You mustn't use your phone during class.",
@@ -111,6 +131,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "どうする", jp: "使ってはいけない", en: "mustn't use" },
                 { role: "何を", jp: "スマホを", en: "your phone" },
                 { role: "いつ", jp: "授業中に", en: "during class" },
+              ],
+              hints: [
+                "語順は「（あなたは）／使ってはいけない／スマホを／授業中に」の順だよ！",
+                "「授業中は〜してはいけない」なのでmustn'tを使うよ。",
+                "「〜の間」は during を使うよ（during class）。",
               ],
             },
           ],
@@ -161,6 +186,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "どこ", jp: "学校に", en: "to school" },
                 { role: "いつ", jp: "今日は", en: "today" },
               ],
+              hints: [
+                "語順は「（あなたは）／行く必要はない／学校に／今日は」の順だよ！",
+                "「〜する必要はない」なのでdon't have toを使うよ。",
+                "「〜へ」は to を使うよ（to school）。",
+              ],
             },
             {
               a: "② We have to take an umbrella.",
@@ -170,6 +200,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "どうする", jp: "持っていく必要がある", en: "have to take" },
                 { role: "何を", jp: "傘を", en: "an umbrella" },
               ],
+              hints: [
+                "語順は「私たちは／持っていく必要がある／傘を」の順だよ！",
+                "「〜する必要がある」なのでhave toを使うよ。",
+                "「持っていく」は take を使うよ（take an umbrella）。",
+              ],
             },
             {
               a: "③ She doesn't have to wake up early on Sundays.",
@@ -178,6 +213,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "誰は", jp: "彼女は", en: "She" },
                 { role: "どうする", jp: "早起きする必要はない", en: "doesn't have to wake up early" },
                 { role: "いつ", jp: "毎週日曜日に", en: "on Sundays" },
+              ],
+              hints: [
+                "語順は「彼女は／早起きする必要はない／毎週日曜日に」の順だよ！",
+                "主語が三人称単数（She）なのでdoesn't have toを使うよ。",
+                "曜日には on を使うよ（on Sundays）。",
               ],
             },
             {
@@ -189,6 +229,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "何を", jp: "ヘルメットを", en: "helmets" },
                 { role: "いつ", jp: "自転車に乗るときは", en: "when we ride bikes" },
               ],
+              hints: [
+                "語順は「私たちは／かぶる必要がある／ヘルメットを／自転車に乗るときは」の順だよ！",
+                "「〜する必要がある」なのでhave toを使うよ。",
+                "「〜するときは」は when を使って文の後ろにつなげよう（when we ride bikes）。",
+              ],
             },
             {
               a: "⑤ You don't have to take this test.",
@@ -198,6 +243,11 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "どうする", jp: "受ける必要はない", en: "don't have to take" },
                 { role: "何を", jp: "このテストを", en: "this test" },
               ],
+              hints: [
+                "語順は「（あなたは）／受ける必要はない／このテストを」の順だよ！",
+                "「〜する必要はない」なのでdon't have toを使うよ。",
+                "「受ける」は take を使うよ（take this test）。",
+              ],
             },
           ],
         },
@@ -206,23 +256,39 @@ const ANSWER_CHECK_CONFIG = {
   },
 };
 
+const HINT_BUTTON_LABELS = ["ヒント①を見る（語順）", "ヒント②を見る（文法）", "ヒント③を見る（つなぎ言葉）"];
+
 function AnswerCheckPanel({ config }) {
   const [open, setOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState({}); // "stepKey-sectionIdx-itemIdx" -> bool
+  const [answerOpen, setAnswerOpen] = useState({}); // 同上 -> bool（答え本体を見るか）
+  const [hintLevel, setHintLevel] = useState({}); // 同上 -> 表示済みヒント数（0〜3）
   if (!config) return null;
 
   function toggleDetail(key) {
     setDetailOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
+  function toggleAnswer(key) {
+    setAnswerOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
+  function revealNextHint(key, max) {
+    setHintLevel((prev) => ({ ...prev, [key]: Math.min((prev[key] || 0) + 1, max) }));
+  }
+
+  function hideHints(key) {
+    setHintLevel((prev) => ({ ...prev, [key]: 0 }));
+  }
+
   return (
     <div className="card">
-      <p className="section-title">📖 紙のワークシートの答え合わせ</p>
+      <p className="section-title">📖 紙のワークシートのヒント・答え合わせ</p>
       <p className="muted">
-        ワークシートで解いた問題の答えをここで確認できるよ（ワークシートが基本！まずは自分で解いてから見よう）
+        ワークシートで困ったらヒントを、答え合わせをしたいときは答えを見よう（ワークシートが基本！まずは自分で解いてから見よう）
       </p>
       <button className="btn secondary" onClick={() => setOpen((o) => !o)}>
-        {open ? "答え合わせを閉じる" : "答え合わせを見る"}
+        {open ? "閉じる" : "ヒント・答え合わせを見る"}
       </button>
       {open && (
         <div style={{ marginTop: 10 }}>
@@ -250,47 +316,112 @@ function AnswerCheckPanel({ config }) {
                       </p>
                     )}
                     {sec.items.map((it, j) => {
-                      const detailKey = `${stepKey}-${i}-${j}`;
-                      const isDetailOpen = !!detailOpen[detailKey];
+                      const itemKey = `${stepKey}-${i}-${j}`;
+                      const isDetailOpen = !!detailOpen[itemKey];
+                      const isAnswerOpen = !!answerOpen[itemKey];
+                      const level = hintLevel[itemKey] || 0;
                       return (
-                        <div key={j} style={{ marginBottom: 4 }}>
-                          <p style={{ margin: "2px 0" }}>{it.a}</p>
-                          {it.note && (
-                            <p className="muted" style={{ fontSize: 13, margin: "0 0 4px 0" }}>
-                              💡 {it.note}
-                            </p>
-                          )}
-                          {it.breakdown && (
-                            <>
-                              <button
-                                className="btn secondary"
-                                style={{ fontSize: 12, padding: "3px 10px", marginBottom: 4 }}
-                                onClick={() => toggleDetail(detailKey)}
-                              >
-                                {isDetailOpen ? "詳しい解説を閉じる" : "🔍 詳しく"}
-                              </button>
-                              {isDetailOpen && (
-                                <div
+                        <div
+                          key={j}
+                          style={{
+                            marginBottom: 10,
+                            paddingBottom: 8,
+                            borderBottom: "1px dashed #dce6e4",
+                          }}
+                        >
+                          {it.hints && it.hints.length > 0 && (
+                            <div style={{ marginBottom: 6 }}>
+                              <p style={{ margin: "0 0 4px 0", fontWeight: "bold", fontSize: 13 }}>
+                                💡 ワークシートのヒントはこちら！
+                              </p>
+                              {it.hints.slice(0, level).map((h, hi) => (
+                                <p
+                                  key={hi}
+                                  className="muted"
                                   style={{
-                                    background: "#fff",
-                                    border: "1px solid #cfe0dd",
+                                    fontSize: 13,
+                                    margin: "0 0 4px 0",
+                                    background: "#fff8e6",
+                                    border: "1px solid #f0e0b0",
                                     borderRadius: 8,
-                                    padding: "8px 10px",
-                                    marginBottom: 6,
+                                    padding: "5px 8px",
                                   }}
                                 >
-                                  {it.breakdown.map((b, k) => (
-                                    <p key={k} style={{ margin: "2px 0", fontSize: 13 }}>
-                                      <span className="muted">{b.role}：</span>
-                                      {b.jp}　→　<strong>{b.en}</strong>
-                                    </p>
-                                  ))}
-                                  <p style={{ margin: "6px 0 0 0", fontSize: 14 }}>
-                                    {it.breakdown.map((b) => b.en).join(" / ")}
-                                  </p>
-                                </div>
+                                  ヒント{["①", "②", "③"][hi]}：{h}
+                                </p>
+                              ))}
+                              <div className="btn-row">
+                                {level < it.hints.length && (
+                                  <button
+                                    className="btn secondary"
+                                    style={{ fontSize: 12, padding: "3px 10px" }}
+                                    onClick={() => revealNextHint(itemKey, it.hints.length)}
+                                  >
+                                    {HINT_BUTTON_LABELS[level] || "次のヒントを見る"}
+                                  </button>
+                                )}
+                                {level > 0 && (
+                                  <button
+                                    className="btn secondary"
+                                    style={{ fontSize: 12, padding: "3px 10px" }}
+                                    onClick={() => hideHints(itemKey)}
+                                  >
+                                    ヒントを隠す
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          <button
+                            className="btn secondary"
+                            style={{ fontSize: 12, padding: "3px 10px", marginBottom: 4 }}
+                            onClick={() => toggleAnswer(itemKey)}
+                          >
+                            {isAnswerOpen ? "答えを隠す" : "✅ 答えを見る"}
+                          </button>
+
+                          {isAnswerOpen && (
+                            <div>
+                              <p style={{ margin: "2px 0" }}>{it.a}</p>
+                              {it.note && (
+                                <p className="muted" style={{ fontSize: 13, margin: "0 0 4px 0" }}>
+                                  💡 {it.note}
+                                </p>
                               )}
-                            </>
+                              {it.breakdown && (
+                                <>
+                                  <button
+                                    className="btn secondary"
+                                    style={{ fontSize: 12, padding: "3px 10px", marginBottom: 4 }}
+                                    onClick={() => toggleDetail(itemKey)}
+                                  >
+                                    {isDetailOpen ? "詳しい解説を閉じる" : "🔍 詳しく"}
+                                  </button>
+                                  {isDetailOpen && (
+                                    <div
+                                      style={{
+                                        background: "#fff",
+                                        border: "1px solid #cfe0dd",
+                                        borderRadius: 8,
+                                        padding: "8px 10px",
+                                        marginBottom: 6,
+                                      }}
+                                    >
+                                      {it.breakdown.map((b, k) => (
+                                        <p key={k} style={{ margin: "2px 0", fontSize: 13 }}>
+                                          <span className="muted">{b.role}：</span>
+                                          {b.jp}　→　<strong>{b.en}</strong>
+                                        </p>
+                                      ))}
+                                      <p style={{ margin: "6px 0 0 0", fontSize: 14 }}>
+                                        {it.breakdown.map((b) => b.en).join(" / ")}
+                                      </p>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
                           )}
                         </div>
                       );
