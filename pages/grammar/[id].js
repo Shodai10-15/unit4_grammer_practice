@@ -30,8 +30,8 @@ const STEP1_SKILLS = [
 ];
 
 const STEP2_SKILLS = [
-  { key: "S", label: <><Icon name="headphones" /><Icon name="mic" /> ディクテーション＆シャドーイング</>, desc: "書き取って→音読する" },
-  { key: "W", label: <><Icon name="pencil" /><Icon name="mic" /> 英作文→発話</>, desc: "書いて→日本語だけ見て話す" },
+  { key: "S", label: <><Icon name="headphones" /><Icon name="pencil" /> ディクテーション</>, desc: "音声を聞いて英文を書き取る" },
+  { key: "W", label: <><Icon name="pencil" /> 英作文（タイムアタック）</>, desc: "書いて→日本語だけ見て20秒でもう一度書く" },
 ];
 
 export default function GrammarPage() {
@@ -74,9 +74,6 @@ export default function GrammarPage() {
     return row ? "passed" : "none";
   }
 
-  const unlockedStep1 = progress.some((r) => r.step === 0 && r.skill === "S1" && r.status === "passed");
-  const unlockedStep2 = progress.some((r) => r.step === 0 && r.skill === "S2" && r.status === "passed");
-  const unlockedStep3 = progress.some((r) => r.step === 0 && r.skill === "S3" && r.status === "passed");
   const step1Done = progress.some((r) => r.step === 1 && r.status === "passed");
   const step2Done = progress.some((r) => r.step === 2 && r.status === "passed");
   const step3Done = progress.some((r) => r.step === 3 && r.status === "passed");
@@ -132,28 +129,6 @@ export default function GrammarPage() {
 
   if (!session || !grammar) return null;
 
-  if (!unlockedStep1) {
-    return (
-      <div className="page">
-        <div className="header">
-          <h1>
-            {grammar}　{GRAMMAR_LABEL[grammar]}
-          </h1>
-          <button className="btn secondary" onClick={() => router.push("/select")}>
-            一覧へ
-          </button>
-        </div>
-        <UnlockGate
-          grammar={grammar}
-          step={1}
-          onUnlocked={async () => {
-            await saveProgress(0, "S1", "passed");
-          }}
-        />
-      </div>
-    );
-  }
-
   const isStep1Writing = mode && mode.step === 1 && mode.skill === "W";
   const isStep1Choice = mode && mode.step === 1 && (mode.skill === "L" || mode.skill === "R");
   const isStep2Dictation = mode && mode.step === 2 && mode.skill === "S";
@@ -204,17 +179,7 @@ export default function GrammarPage() {
               Step2　暗記・習熟（合格ライン）
             </p>
             {!step1Done && <p className="muted">先にStep1を1つ終えよう</p>}
-            {step1Done && !unlockedStep2 && (
-              <UnlockGate
-                grammar={grammar}
-                step={2}
-                inline
-                onUnlocked={async () => {
-                  await saveProgress(0, "S2", "passed");
-                }}
-              />
-            )}
-            {step1Done && unlockedStep2 && (
+            {step1Done && (
               <>
                 <p className="muted">満点・80%以上の一致で合格！何度でも挑戦しよう</p>
                 <div className="grid">
@@ -241,17 +206,7 @@ export default function GrammarPage() {
               Step3　応用（ALTの先生に伝えよう）
             </p>
             {!step2Done && <p className="muted">先にStep2の合格が必要です</p>}
-            {step2Done && !unlockedStep3 && (
-              <UnlockGate
-                grammar={grammar}
-                step={3}
-                inline
-                onUnlocked={async () => {
-                  await saveProgress(0, "S3", "passed");
-                }}
-              />
-            )}
-            {step2Done && unlockedStep3 && (
+            {step2Done && (
               <div
                 className="tile"
                 style={{ maxWidth: 260 }}
@@ -376,60 +331,6 @@ const STEP3_CONFIG = {
       "Students must help each other. Students mustn't use their phones in class.",
   },
 };
-
-function UnlockGate({ grammar, step, onUnlocked, inline }) {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-  const [checking, setChecking] = useState(false);
-
-  async function submit() {
-    if (!code.trim()) {
-      setError("合言葉を入力しよう");
-      return;
-    }
-    setChecking(true);
-    setError("");
-    try {
-      const res = await fetch("/api/unlock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ grammar, step, code: code.trim() }),
-      });
-      const data = await res.json();
-      if (!data.ok) {
-        setError(data.error || "合言葉が違います");
-        setChecking(false);
-        return;
-      }
-      await onUnlocked();
-    } catch {
-      setError("通信エラーが発生しました");
-      setChecking(false);
-    }
-  }
-
-  const content = (
-    <>
-      <p className="section-title">🔒 Step{step}の合言葉</p>
-      <p className="muted">
-        ワークシートのStep{step}部分に取り組み、そこで分かる合言葉を入力してから進もう。
-      </p>
-      <input
-        type="text"
-        placeholder="合言葉を入力"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-      />
-      {error && <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>{error}</p>}
-      <button className="btn" onClick={submit} disabled={checking}>
-        {checking ? "確認中..." : "進む"}
-      </button>
-    </>
-  );
-
-  if (inline) return <div>{content}</div>;
-  return <div className="card">{content}</div>;
-}
 
 function RulesTask({ config, onSubmit }) {
   const [rules, setRules] = useState(["", "", "", "", ""]);

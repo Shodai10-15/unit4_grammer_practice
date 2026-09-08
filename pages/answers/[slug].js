@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 const SETS = {
   "g1-step1-answers": {
     title: "G1 Step1　こたえ合わせ",
-    code: "SCHOOLRULE1",
     sections: [
       { label: "① Reading", lines: ["① A", "② A", "③ A", "④ A"] },
       { label: "② Writing", lines: ["① must", "② mustn't", "③ must", "④ mustn't", "⑤ must"] },
@@ -35,7 +34,6 @@ const SETS = {
   },
   "g1-step2-answers": {
     title: "G1 Step2　こたえ合わせ",
-    code: "SCHOOLRULE2",
     sections: [
       {
         label: "① 英作文",
@@ -134,10 +132,6 @@ const SETS = {
       },
     ],
   },
-  "g1-step3-code": {
-    title: "G1 Step3　解放コード",
-    code: "BONUS1",
-  },
 };
 
 export default function AnswerPage() {
@@ -171,17 +165,14 @@ export default function AnswerPage() {
           ))}
         </div>
       ))}
-      {set.code && (
-        <div
-          className="card"
-          style={{ background: "#eaf4f2", border: "1px solid #cfe0dd" }}
-        >
-          <p className="section-title">OKだったら、この合言葉をアプリに入力しよう</p>
-          <p style={{ fontSize: 26, fontWeight: "bold", color: "#c0392b", margin: "6px 0 0" }}>
-            {set.code}
-          </p>
-        </div>
-      )}
+      <div
+        className="card"
+        style={{ background: "#eaf4f2", border: "1px solid #cfe0dd" }}
+      >
+        <p style={{ margin: 0, fontWeight: "bold", color: "#1F4E79" }}>
+          OKだったらアプリに戻ろう。次のステップは自動で開放されるよ！
+        </p>
+      </div>
     </div>
   );
 }
