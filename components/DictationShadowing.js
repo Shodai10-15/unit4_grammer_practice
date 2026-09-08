@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AudioPlayer from "./AudioPlayer";
-import { wordAccuracy, exactMatch } from "../lib/textSimilarity";
+import { wordAccuracy, exactMatch, missingWords } from "../lib/textSimilarity";
 
 const DICTATION_PASS = 80;
 
@@ -87,11 +87,14 @@ export default function DictationShadowing({ questions, onFinish }) {
         {result && (
           <div style={{ marginTop: 8 }}>
             <p>
-              {result.correct
-                ? "✅ 完全一致！"
-                : `一致率 ${result.accuracy}%（正解: ${q.question}）`}
+              {result.correct ? "✅ 完全一致！" : `一致率 ${result.accuracy}%`}
               {!result.correct && result.passed && "　→ 80%以上なので合格です"}
             </p>
+            {!result.correct && !result.passed && missingWords(q.question, input).length > 0 && (
+              <p style={{ color: "var(--danger, #c0392b)", fontSize: 14 }}>
+                💡 この単語を使おう！：{missingWords(q.question, input).join("、")}
+              </p>
+            )}
             <div className="btn-row">
               {!result.passed && (
                 <button className="btn secondary" onClick={retry}>

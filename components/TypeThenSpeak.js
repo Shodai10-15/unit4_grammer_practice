@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { wordAccuracy, exactMatch } from "../lib/textSimilarity";
+import { wordAccuracy, exactMatch, missingWords } from "../lib/textSimilarity";
 
 const PASS_THRESHOLD = 80;
 const TIME_LIMIT_SEC = 20;
@@ -153,6 +153,11 @@ export default function TypeThenSpeak({ questions, onFinish }) {
                     ? "✅ 正解！"
                     : `❌ まだ100%ではありません（一致度 ${writeResult.accuracy}%）。もう一度書いてみよう`}
                 </p>
+                {!writeResult.correct && missingWords(q.english, input).length > 0 && (
+                  <p style={{ color: "var(--danger, #c0392b)", fontSize: 14 }}>
+                    💡 この単語を使おう！：{missingWords(q.english, input).join("、")}
+                  </p>
+                )}
                 <div className="btn-row">
                   {!writeResult.correct && (
                     <button className="btn secondary" onClick={retryWrite}>
@@ -212,11 +217,15 @@ export default function TypeThenSpeak({ questions, onFinish }) {
             {retypeResult && (
               <div style={{ marginTop: 8 }}>
                 <p>
-                  {retypeResult.correct
-                    ? "✅ 完全一致！"
-                    : `一致率 ${retypeResult.accuracy}%（正解: ${q.english}）`}
+                  {retypeResult.correct ? "✅ 完全一致！" : `一致率 ${retypeResult.accuracy}%`}
                   {!retypeResult.correct && retypeResult.passed && "　→ 80%以上なので合格です"}
                 </p>
+                {!retypeResult.correct && !retypeResult.passed && !timedOut &&
+                  missingWords(q.english, retypeInput).length > 0 && (
+                    <p style={{ color: "var(--danger, #c0392b)", fontSize: 14 }}>
+                      💡 この単語を使おう！：{missingWords(q.english, retypeInput).join("、")}
+                    </p>
+                  )}
                 <div className="btn-row">
                   {!retypeResult.passed && !timedOut && (
                     <button
