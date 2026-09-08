@@ -62,12 +62,57 @@ const ANSWER_CHECK_CONFIG = {
       sections: [
         {
           label: "① 英作文",
+          orderNote:
+            "英語は　誰は／どうする／（何を）／（どこ）／（いつ）　の順番に並べます。日本語と語順が違うところに注目しよう。",
           items: [
-            { a: "① I must get up at six every morning.", note: "「〜しなければならない」＝must＋動詞の原形。" },
-            { a: "② You mustn't take pictures here.", note: "「〜してはいけない」＝mustn't＋動詞の原形。" },
-            { a: "③ We mustn't run in the hallway.", note: "主語がWeでもmustn'tの形は変わらない。" },
-            { a: "④ He must return this book today.", note: "主語が三人称でもmustはそのままmust。" },
-            { a: "⑤ You mustn't use your phone during class.", note: "「授業中は〜してはいけない」＝mustn't。" },
+            {
+              a: "① I must get up at six every morning.",
+              note: "「〜しなければならない」＝must＋動詞の原形。",
+              breakdown: [
+                { role: "誰は", jp: "私は", en: "I" },
+                { role: "どうする", jp: "起きなければならない", en: "must get up" },
+                { role: "いつ", jp: "毎朝6時に", en: "at six every morning" },
+              ],
+            },
+            {
+              a: "② You mustn't take pictures here.",
+              note: "「〜してはいけない」＝mustn't＋動詞の原形。",
+              breakdown: [
+                { role: "誰は", jp: "（あなたは）", en: "You" },
+                { role: "どうする", jp: "撮ってはいけない", en: "mustn't take" },
+                { role: "何を", jp: "写真を", en: "pictures" },
+                { role: "どこ", jp: "ここで", en: "here" },
+              ],
+            },
+            {
+              a: "③ We mustn't run in the hallway.",
+              note: "主語がWeでもmustn'tの形は変わらない。",
+              breakdown: [
+                { role: "誰は", jp: "私たちは", en: "We" },
+                { role: "どうする", jp: "走ってはいけない", en: "mustn't run" },
+                { role: "どこ", jp: "廊下で", en: "in the hallway" },
+              ],
+            },
+            {
+              a: "④ He must return this book today.",
+              note: "主語が三人称でもmustはそのままmust。",
+              breakdown: [
+                { role: "誰は", jp: "彼は", en: "He" },
+                { role: "どうする", jp: "返さなければならない", en: "must return" },
+                { role: "何を", jp: "この本を", en: "this book" },
+                { role: "いつ", jp: "今日", en: "today" },
+              ],
+            },
+            {
+              a: "⑤ You mustn't use your phone during class.",
+              note: "「授業中は〜してはいけない」＝mustn't。",
+              breakdown: [
+                { role: "誰は", jp: "（あなたは）", en: "You" },
+                { role: "どうする", jp: "使ってはいけない", en: "mustn't use" },
+                { role: "何を", jp: "スマホを", en: "your phone" },
+                { role: "いつ", jp: "授業中に", en: "during class" },
+              ],
+            },
           ],
         },
         {
@@ -81,7 +126,13 @@ const ANSWER_CHECK_CONFIG = {
 
 function AnswerCheckPanel({ config }) {
   const [open, setOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState({}); // "stepKey-sectionIdx-itemIdx" -> bool
   if (!config) return null;
+
+  function toggleDetail(key) {
+    setDetailOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
   return (
     <div className="card">
       <p className="section-title">📖 紙のワークシートの答え合わせ</p>
@@ -93,25 +144,75 @@ function AnswerCheckPanel({ config }) {
       </button>
       {open && (
         <div style={{ marginTop: 10 }}>
-          {["step1", "step2"].map((key) =>
-            config[key] ? (
-              <div key={key} style={{ marginBottom: 12 }}>
+          {["step1", "step2"].map((stepKey) =>
+            config[stepKey] ? (
+              <div key={stepKey} style={{ marginBottom: 12 }}>
                 <p className="section-title" style={{ fontSize: 16 }}>
-                  {config[key].title}
+                  {config[stepKey].title}
                 </p>
-                {config[key].sections.map((sec, i) => (
+                {config[stepKey].sections.map((sec, i) => (
                   <div key={i} style={{ marginBottom: 8 }}>
                     <p style={{ fontWeight: "bold", margin: "4px 0" }}>{sec.label}</p>
-                    {sec.items.map((it, j) => (
-                      <div key={j} style={{ marginBottom: 4 }}>
-                        <p style={{ margin: "2px 0" }}>{it.a}</p>
-                        {it.note && (
-                          <p className="muted" style={{ fontSize: 13, margin: "0 0 4px 0" }}>
-                            💡 {it.note}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                    {sec.orderNote && (
+                      <p
+                        className="muted"
+                        style={{
+                          fontSize: 13,
+                          margin: "0 0 6px 0",
+                          background: "var(--bg-accent, #eaf4f2)",
+                          borderRadius: 8,
+                          padding: "6px 10px",
+                        }}
+                      >
+                        📐 {sec.orderNote}
+                      </p>
+                    )}
+                    {sec.items.map((it, j) => {
+                      const detailKey = `${stepKey}-${i}-${j}`;
+                      const isDetailOpen = !!detailOpen[detailKey];
+                      return (
+                        <div key={j} style={{ marginBottom: 4 }}>
+                          <p style={{ margin: "2px 0" }}>{it.a}</p>
+                          {it.note && (
+                            <p className="muted" style={{ fontSize: 13, margin: "0 0 4px 0" }}>
+                              💡 {it.note}
+                            </p>
+                          )}
+                          {it.breakdown && (
+                            <>
+                              <button
+                                className="btn secondary"
+                                style={{ fontSize: 12, padding: "3px 10px", marginBottom: 4 }}
+                                onClick={() => toggleDetail(detailKey)}
+                              >
+                                {isDetailOpen ? "詳しい解説を閉じる" : "🔍 詳しく"}
+                              </button>
+                              {isDetailOpen && (
+                                <div
+                                  style={{
+                                    background: "#fff",
+                                    border: "1px solid #cfe0dd",
+                                    borderRadius: 8,
+                                    padding: "8px 10px",
+                                    marginBottom: 6,
+                                  }}
+                                >
+                                  {it.breakdown.map((b, k) => (
+                                    <p key={k} style={{ margin: "2px 0", fontSize: 13 }}>
+                                      <span className="muted">{b.role}：</span>
+                                      {b.jp}　→　<strong>{b.en}</strong>
+                                    </p>
+                                  ))}
+                                  <p style={{ margin: "6px 0 0 0", fontSize: 14 }}>
+                                    {it.breakdown.map((b) => b.en).join(" / ")}
+                                  </p>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ))}
               </div>
