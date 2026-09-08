@@ -1,0 +1,93 @@
+diff --git a/pages/grammar/[id].js b/pages/grammar/[id].js
+index 7672948..0358c1a 100644
+--- a/pages/grammar/[id].js
++++ b/pages/grammar/[id].js
+@@ -122,6 +122,88 @@ const ANSWER_CHECK_CONFIG = {
+       ],
+     },
+   },
++  U4G2: {
++    step1: {
++      title: "Step1　ワークシートの答え合わせ",
++      sections: [
++        {
++          label: "① Reading（すべて A）",
++          items: [
++            { a: "A", note: "「〜する必要がある／必要はない」の意味を選ぶ問題。本文中のhave to/don't have toの形をチェックしよう。" },
++          ],
++        },
++        {
++          label: "② Writing",
++          items: [
++            { a: "① don't have to", note: "「今日は学校に行く必要はない」＝don't have to。" },
++            { a: "② have to", note: "「傘を持っていく必要がある」＝have to。" },
++            { a: "③ don't have to", note: "「このテストは受ける必要はない」＝don't have to。" },
++            { a: "④ doesn't have to", note: "主語Sheは三人称単数なのでdoesn't have to。" },
++            { a: "⑤ have to", note: "「ヘルメットをかぶる必要がある」＝have to。" },
++          ],
++        },
++      ],
++    },
++    step2: {
++      title: "Step2　ワークシートの答え合わせ",
++      sections: [
++        {
++          label: "① 英作文",
++          orderNote:
++            "英語は　誰は／どうする／（何を）／（どこ）／（いつ）　の順番に並べます。日本語と語順が違うところに注目しよう。",
++          items: [
++            {
++              a: "① You don't have to go to school today.",
++              note: "「〜する必要はない」＝don't have to＋動詞の原形。",
++              breakdown: [
++                { role: "誰は", jp: "（あなたは）", en: "You" },
++                { role: "どうする", jp: "行く必要はない", en: "don't have to go" },
++                { role: "どこ", jp: "学校に", en: "to school" },
++                { role: "いつ", jp: "今日は", en: "today" },
++              ],
++            },
++            {
++              a: "② We have to take an umbrella.",
++              note: "「〜する必要がある」＝have to＋動詞の原形。",
++              breakdown: [
++                { role: "誰は", jp: "私たちは", en: "We" },
++                { role: "どうする", jp: "持っていく必要がある", en: "have to take" },
++                { role: "何を", jp: "傘を", en: "an umbrella" },
++              ],
++            },
++            {
++              a: "③ She doesn't have to wake up early on Sundays.",
++              note: "主語が三人称単数なのでdoesn't have to。",
++              breakdown: [
++                { role: "誰は", jp: "彼女は", en: "She" },
++                { role: "どうする", jp: "早起きする必要はない", en: "doesn't have to wake up early" },
++                { role: "いつ", jp: "毎週日曜日に", en: "on Sundays" },
++              ],
++            },
++            {
++              a: "④ We have to wear helmets when we ride bikes.",
++              note: "「〜するときは」＝when we ride bikesを後ろに置く。",
++              breakdown: [
++                { role: "誰は", jp: "私たちは", en: "We" },
++                { role: "どうする", jp: "かぶる必要がある", en: "have to wear" },
++                { role: "何を", jp: "ヘルメットを", en: "helmets" },
++                { role: "いつ", jp: "自転車に乗るときは", en: "when we ride bikes" },
++              ],
++            },
++            {
++              a: "⑤ You don't have to take this test.",
++              note: "「〜する必要はない」＝don't have to＋動詞の原形。",
++              breakdown: [
++                { role: "誰は", jp: "（あなたは）", en: "You" },
++                { role: "どうする", jp: "受ける必要はない", en: "don't have to take" },
++                { role: "何を", jp: "このテストを", en: "this test" },
++              ],
++            },
++          ],
++        },
++      ],
++    },
++  },
+ };
+ 
+ function AnswerCheckPanel({ config }) {
