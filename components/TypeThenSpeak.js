@@ -21,9 +21,33 @@ export default function TypeThenSpeak({ questions, onFinish }) {
   const [error, setError] = useState("");
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT_SEC);
   const [timedOut, setTimedOut] = useState(false);
+  // ヒントモード：ONにすると日本語を英語の語順に並べ替えて表示する（難しい生徒向け）
+  // 端末に保存して次回も覚えておく
+  const [hintMode, setHintMode] = useState(false);
   const timerRef = useRef(null);
 
+  useEffect(() => {
+    try {
+      setHintMode(localStorage.getItem("u4_hint_mode") === "1");
+    } catch {
+      // localStorageが使えない環境では何もしない
+    }
+  }, []);
+
+  function toggleHintMode() {
+    setHintMode((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("u4_hint_mode", next ? "1" : "0");
+      } catch {
+        // 保存できなくても動作には影響しない
+      }
+      return next;
+    });
+  }
+
   const q = questions[index];
+  const hintOrder = q && Array.isArray(q.hintOrder) ? q.hintOrder : [];
 
   function checkWrite() {
     if (!input.trim()) {
@@ -124,12 +148,40 @@ export default function TypeThenSpeak({ questions, onFinish }) {
         <div style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
       </div>
       <p className="muted">
-        問題 {index + 1} / {questions.length}　
+        問題 {index + 1} / {questions.length}
         {phase === "write" ? "①英作文" : "②タイムアタック（80%以上・20秒以内で合格）"}
       </p>
 
+      <label
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 13,
+          marginBottom: 8,
+          cursor: "pointer",
+        }}
+      >
+        <input type="checkbox" checked={hintMode} onChange={toggleHintMode} />
+        💡 ヒントモード（日本語を英語の語順に並べ替えて表示する）
+      </label>
+
       <div className="card">
         <p style={{ fontSize: 18, fontWeight: "bold" }}>{q.japanese}</p>
+        {hintMode && hintOrder.length > 0 && (
+          <p
+            className="muted"
+            style={{
+              fontSize: 14,
+              marginTop: 4,
+              background: "var(--bg-accent, #eaf4f2)",
+              borderRadius: 8,
+              padding: "6px 10px",
+            }}
+          >
+            語順：{hintOrder.join("　／　")}
+          </p>
+        )}
 
         {phase === "write" && (
           <>

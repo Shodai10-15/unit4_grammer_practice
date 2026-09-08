@@ -325,10 +325,12 @@ export default function GrammarPage() {
   const isStep2TypeSpeak = mode && (mode.step === 2 || mode.step === 25) && mode.skill === "W";
 
   // Step2 W（英作文→発話）用に question/correct を japanese/english の形へ詰め替える
+  // note列には「英語の語順に並べ替えた日本語」を｜区切りで入れてあり、ヒントモードで使う
   const typeSpeakQuestions = questions.map((q) => ({
     id: q.id,
     japanese: q.question,
     english: q.correct,
+    hintOrder: q.note ? q.note.split("｜").filter(Boolean) : [],
   }));
 
   return (
