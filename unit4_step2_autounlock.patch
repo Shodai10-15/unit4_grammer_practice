@@ -1,0 +1,891 @@
+diff --git a/components/DictationShadowing.js b/components/DictationShadowing.js
+index a6905be..f486e35 100644
+--- a/components/DictationShadowing.js
++++ b/components/DictationShadowing.js
+@@ -1,31 +1,22 @@
+-import { useEffect, useRef, useState } from "react";
++import { useState } from "react";
+ import AudioPlayer from "./AudioPlayer";
+-import { isSpeechRecognitionSupported } from "../lib/speechRecognition";
+-import { wordAccuracy, exactMatch, wordMatchDetail } from "../lib/textSimilarity";
++import { wordAccuracy, exactMatch } from "../lib/textSimilarity";
+ 
+ const DICTATION_PASS = 80;
+-const SHADOW_PASS = 90; // 1語程度の誤りまでは合格にする
+ 
+ // questions: [{id, question, note}]  question = 正解の英文、note = 日本語訳（ヒント用）
+-// フェーズ: dictation（聞いて書き取る・一致率80%以上で次へ）
+-//         → shadowing（英文非表示・再生と同時に録音、再生終了で自動停止。
+-//            不正解時は英文もヒントも出さず「何語間違っているか」だけを表示する）
++// 音声を聞いて、聞こえた英文をそのまま書き取る（一致率80%以上、または完全一致で合格）
++// ※教室では音声認識（マイク入力）が雑音で安定しないため、発話チェックは行わない
+ export default function DictationShadowing({ questions, onFinish }) {
+   const [index, setIndex] = useState(0);
+-  const [phase, setPhase] = useState("dictation");
+   const [input, setInput] = useState("");
+   const [showHint, setShowHint] = useState(false);
+-  const [dictationResult, setDictationResult] = useState(null);
+-  const [listening, setListening] = useState(false);
+-  const [practicing, setPracticing] = useState(false);
+-  const [shadowResult, setShadowResult] = useState(null);
++  const [result, setResult] = useState(null);
+   const [error, setError] = useState("");
+-  const recognizerRef = useRef(null);
+ 
+-  const supported = isSpeechRecognitionSupported();
+   const q = questions[index];
+ 
+-  function checkDictation() {
++  function check() {
+     if (!input.trim()) {
+       setError("聞き取った英文を入力しよう");
+       return;
+@@ -33,101 +24,19 @@ export default function DictationShadowing({ questions, onFinish }) {
+     setError("");
+     const correct = exactMatch(q.question, input);
+     const accuracy = wordAccuracy(q.question, input);
+-    setDictationResult({ correct, accuracy, passed: correct || accuracy >= DICTATION_PASS });
++    setResult({ correct, accuracy, passed: correct || accuracy >= DICTATION_PASS });
+   }
+ 
+-  function goToShadowing() {
+-    setPhase("shadowing");
+-    setDictationResult(null);
++  function retry() {
++    setResult(null);
+     setInput("");
+-    setShowHint(false);
+   }
+ 
+-  function retryDictation() {
+-    setDictationResult(null);
+-    setInput("");
+-  }
+-
+-  // 録音を伴わない「聞くだけ」の練習再生
+-  function practiceListen() {
+-    if (typeof window === "undefined" || !window.speechSynthesis) return;
+-    setPracticing(true);
+-    window.speechSynthesis.cancel();
+-    const utter = new window.SpeechSynthesisUtterance(q.question);
+-    utter.lang = "en-US";
+-    utter.rate = 0.75;
+-    utter.onend = () => setPracticing(false);
+-    utter.onerror = () => setPracticing(false);
+-    window.speechSynthesis.speak(utter);
+-  }
+-
+-  function startShadowing() {
+-    if (!supported) {
+-      setError("このブラウザは音声認識に対応していません（Chrome、またはEdgeでお試しください）");
+-      return;
+-    }
+-    if (typeof window === "undefined" || !window.speechSynthesis) return;
+-
+-    setError("");
+-    setListening(true);
+-    setShadowResult(null);
+-
+-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+-    const recognizer = new SR();
+-    recognizer.lang = "en-US";
+-    recognizer.continuous = true;
+-    recognizer.interimResults = false;
+-    let recognizedText = "";
+-
+-    recognizer.onresult = (e) => {
+-      for (let i = 0; i < e.results.length; i++) {
+-        recognizedText += " " + e.results[i][0].transcript;
+-      }
+-    };
+-    recognizer.onerror = (e) => {
+-      setError("うまく聞き取れませんでした（" + e.error + "）。もう一度試そう");
+-    };
+-    recognizer.onend = () => {
+-      setListening(false);
+-      const result = wordMatchDetail(q.question, recognizedText);
+-      setShadowResult({ ...result, transcript: recognizedText.trim() });
+-    };
+-
+-    recognizerRef.current = recognizer;
+-    recognizer.start();
+-
+-    // 音声再生と録音（音声認識）を同時に開始し、再生終了で自動的に録音を止める
+-    window.speechSynthesis.cancel();
+-    const utter = new window.SpeechSynthesisUtterance(q.question);
+-    utter.lang = "en-US";
+-    utter.rate = 0.75;
+-    utter.onend = () => {
+-      setTimeout(() => {
+-        if (recognizerRef.current) recognizerRef.current.stop();
+-      }, 900);
+-    };
+-    utter.onerror = () => {
+-      if (recognizerRef.current) recognizerRef.current.stop();
+-    };
+-    window.speechSynthesis.speak(utter);
+-  }
+-
+-  useEffect(() => {
+-    return () => {
+-      if (recognizerRef.current) recognizerRef.current.stop();
+-      if (typeof window !== "undefined" && window.speechSynthesis) {
+-        window.speechSynthesis.cancel();
+-      }
+-    };
+-  }, []);
+-
+   function nextQuestion() {
+     if (index + 1 < questions.length) {
+       setIndex(index + 1);
+-      setPhase("dictation");
+       setInput("");
+-      setDictationResult(null);
+-      setShadowResult(null);
++      setResult(null);
+       setShowHint(false);
+       setError("");
+     } else {
+@@ -135,137 +44,69 @@ export default function DictationShadowing({ questions, onFinish }) {
+     }
+   }
+ 
+-  const shadowPassed = shadowResult && shadowResult.ratio >= SHADOW_PASS;
+-  const wrongCount = shadowResult ? shadowResult.total - shadowResult.matchedCount : 0;
+-
+   return (
+     <div>
+       <div className="progress-bar">
+         <div style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
+       </div>
+       <p className="muted">
+-        問題 {index + 1} / {questions.length}　
+-        {phase === "dictation" ? "①ディクテーション" : "②シャドーイング"}
++        問題 {index + 1} / {questions.length}　ディクテーション
+       </p>
+ 
+-      {phase === "dictation" && (
+-        <div className="card">
+-          <p className="muted" style={{ marginBottom: 8 }}>
+-            音声を聞いて、聞こえた英文をそのまま入力しよう（一致率80%以上で合格）
+-          </p>
+-          <AudioPlayer text={q.question} />
+-          <input
+-            type="text"
+-            value={input}
+-            onChange={(e) => setInput(e.target.value)}
+-            placeholder="聞こえた英文を入力"
+-            style={{ marginTop: 12 }}
+-            disabled={!!dictationResult}
+-          />
+-          <div className="btn-row" style={{ marginTop: 8 }}>
+-            {!dictationResult && (
+-              <button className="btn secondary" onClick={() => setShowHint((h) => !h)}>
+-                💡 ヒント
+-              </button>
+-            )}
+-          </div>
+-          {showHint && q.note && (
+-            <p className="muted" style={{ marginTop: 6 }}>
+-              日本語訳：{q.note}
+-            </p>
+-          )}
+-          {error && <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>{error}</p>}
+-          {!dictationResult && (
+-            <button className="btn" style={{ marginTop: 8 }} onClick={checkDictation}>
+-              答え合わせ
++      <div className="card">
++        <p className="muted" style={{ marginBottom: 8 }}>
++          音声を聞いて、聞こえた英文をそのまま入力しよう（一致率80%以上で合格）
++        </p>
++        <AudioPlayer text={q.question} />
++        <input
++          type="text"
++          value={input}
++          onChange={(e) => setInput(e.target.value)}
++          placeholder="聞こえた英文を入力"
++          style={{ marginTop: 12 }}
++          disabled={!!result}
++        />
++        <div className="btn-row" style={{ marginTop: 8 }}>
++          {!result && (
++            <button className="btn secondary" onClick={() => setShowHint((h) => !h)}>
++              💡 ヒント
+             </button>
+           )}
+-          {dictationResult && (
+-            <div style={{ marginTop: 8 }}>
+-              <p>
+-                {dictationResult.correct
+-                  ? "✅ 完全一致！"
+-                  : `一致率 ${dictationResult.accuracy}%（正解: ${q.question}）`}
+-                {!dictationResult.correct && dictationResult.passed && "　→ 80%以上なので合格です"}
+-              </p>
+-              <div className="btn-row">
+-                {!dictationResult.passed && (
+-                  <button className="btn secondary" onClick={retryDictation}>
+-                    もう一度書く
+-                  </button>
+-                )}
+-                {dictationResult.passed && (
+-                  <button className="btn" onClick={goToShadowing}>
+-                    シャドーイングへ進む
+-                  </button>
+-                )}
+-              </div>
+-            </div>
+-          )}
+         </div>
+-      )}
+-
+-      {phase === "shadowing" && (
+-        <div className="card">
+-          <p className="muted" style={{ marginBottom: 8 }}>
+-            英文は表示されません。ボタンを押すと音声が流れるので、聞こえた通りに同時に声に出して読もう（シャドーイング）。再生が終わると自動で録音も止まります。
++        {showHint && q.note && (
++          <p className="muted" style={{ marginTop: 6 }}>
++            日本語訳：{q.note}
+           </p>
+-          {!supported && (
+-            <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>
+-              このブラウザは音声認識に対応していません（Chrome、またはEdgeでお試しください）
++        )}
++        {error && <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>{error}</p>}
++        {!result && (
++          <button className="btn" style={{ marginTop: 8 }} onClick={check}>
++            答え合わせ
++          </button>
++        )}
++        {result && (
++          <div style={{ marginTop: 8 }}>
++            <p>
++              {result.correct
++                ? "✅ 完全一致！"
++                : `一致率 ${result.accuracy}%（正解: ${q.question}）`}
++              {!result.correct && result.passed && "　→ 80%以上なので合格です"}
+             </p>
+-          )}
+-          <div className="btn-row">
+-            <button
+-              className="btn"
+-              onClick={startShadowing}
+-              disabled={listening || practicing || !supported}
+-            >
+-              {listening ? "🔊🎤 再生・録音中..." : "🔊🎤 再生しながら話す"}
+-            </button>
+-            <button
+-              className="btn secondary"
+-              onClick={practiceListen}
+-              disabled={listening || practicing}
+-            >
+-              {practicing ? "🔈 再生中..." : "🔈 もう一度聞く（練習）"}
+-            </button>
+-          </div>
+-          {error && <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>{error}</p>}
+-          {shadowResult && (
+-            <div style={{ marginTop: 12 }}>
+-              {shadowPassed ? (
+-                <>
+-                  <p style={{ fontWeight: "bold", color: "#2e8b57" }}>
+-                    ✅ 合格！（一致率 {shadowResult.ratio}%）
+-                  </p>
+-                  <p className="muted">正解の文：{q.question}</p>
+-                </>
+-              ) : (
+-                <p style={{ fontWeight: "bold", color: "#c0392b" }}>
+-                  ❌ {shadowResult.total}語中 {wrongCount}語 違います（一致率 {shadowResult.ratio}%）
+-                  <br />
+-                  <span style={{ fontWeight: "normal" }}>
+-                    「もう一度聞く」で確認してから、もう一度話してみよう
+-                  </span>
+-                </p>
++            <div className="btn-row">
++              {!result.passed && (
++                <button className="btn secondary" onClick={retry}>
++                  もう一度書く
++                </button>
++              )}
++              {result.passed && (
++                <button className="btn" onClick={nextQuestion}>
++                  {index + 1 < questions.length ? "次の問題へ" : "結果を見る"}
++                </button>
+               )}
+-              <div className="btn-row">
+-                {!shadowPassed && (
+-                  <button className="btn secondary" onClick={startShadowing}>
+-                    もう一度話す
+-                  </button>
+-                )}
+-                {shadowPassed && (
+-                  <button className="btn" onClick={nextQuestion}>
+-                    {index + 1 < questions.length ? "次の問題へ" : "結果を見る"}
+-                  </button>
+-                )}
+-              </div>
+             </div>
+-          )}
+-        </div>
+-      )}
++          </div>
++        )}
++      </div>
+     </div>
+   );
+ }
+diff --git a/components/TypeThenSpeak.js b/components/TypeThenSpeak.js
+index 8098871..cadc107 100644
+--- a/components/TypeThenSpeak.js
++++ b/components/TypeThenSpeak.js
+@@ -1,27 +1,27 @@
+ import { useEffect, useRef, useState } from "react";
+-import { listenOnce, isSpeechRecognitionSupported } from "../lib/speechRecognition";
+-import { wordAccuracy, exactMatch, wordMatchDetail } from "../lib/textSimilarity";
++import { wordAccuracy, exactMatch } from "../lib/textSimilarity";
+ 
+ const PASS_THRESHOLD = 80;
+-const TIME_LIMIT_SEC = 15;
++const TIME_LIMIT_SEC = 20;
+ 
+ // questions: [{id, japanese, english}]
+-// フェーズ: write（日本語を見て英作文をタイプ）
+-//         → speak（英語を隠して日本語だけ見て発話。フェーズ開始と同時に15秒のタイマーが動き、
+-//            時間内に合格ラインに届かないと「時間切れ」になる）
++// フェーズ: write（日本語を見て英作文をタイプ、時間制限なし）
++//         → retype（英文を隠して日本語だけ見て、もう一度タイプ。フェーズ開始と同時に20秒の
++//            タイマーが動き、時間内に合格ラインに届かないと「時間切れ」になる）
++// ※教室では音声認識（マイク入力）が雑音で安定しないため、発話チェックの代わりに
++//   タイムアタック形式のタイピングチェックを行う
+ export default function TypeThenSpeak({ questions, onFinish }) {
+   const [index, setIndex] = useState(0);
+   const [phase, setPhase] = useState("write");
+   const [input, setInput] = useState("");
+   const [writeResult, setWriteResult] = useState(null);
+-  const [listening, setListening] = useState(false);
+-  const [speakResult, setSpeakResult] = useState(null);
++  const [retypeInput, setRetypeInput] = useState("");
++  const [retypeResult, setRetypeResult] = useState(null);
+   const [error, setError] = useState("");
+   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT_SEC);
+   const [timedOut, setTimedOut] = useState(false);
+   const timerRef = useRef(null);
+ 
+-  const supported = isSpeechRecognitionSupported();
+   const q = questions[index];
+ 
+   function checkWrite() {
+@@ -35,8 +35,8 @@ export default function TypeThenSpeak({ questions, onFinish }) {
+     setWriteResult({ correct, accuracy });
+   }
+ 
+-  function goToSpeak() {
+-    setPhase("speak");
++  function goToRetype() {
++    setPhase("retype");
+     setWriteResult(null);
+     setInput("");
+   }
+@@ -46,30 +46,9 @@ export default function TypeThenSpeak({ questions, onFinish }) {
+     setInput("");
+   }
+ 
+-  // speakフェーズに入った瞬間から15秒のカウントダウンを開始する
+-  useEffect(() => {
+-    if (phase !== "speak") return;
+-    setTimeLeft(TIME_LIMIT_SEC);
+-    setTimedOut(false);
+-    const start = performance.now();
+-    const timer = setInterval(() => {
+-      const elapsed = (performance.now() - start) / 1000;
+-      const remaining = Math.max(0, Math.ceil(TIME_LIMIT_SEC - elapsed));
+-      setTimeLeft(remaining);
+-      if (remaining <= 0) {
+-        clearInterval(timer);
+-        setTimedOut(true);
+-      }
+-    }, 200);
+-    timerRef.current = timer;
+-    return () => clearInterval(timer);
+-  }, [phase, index]);
+-
+-  function restartTimer() {
++  function startTimer() {
+     setTimedOut(false);
+     setTimeLeft(TIME_LIMIT_SEC);
+-    setSpeakResult(null);
+-    setError("");
+     if (timerRef.current) clearInterval(timerRef.current);
+     const start = performance.now();
+     const timer = setInterval(() => {
+@@ -84,32 +63,42 @@ export default function TypeThenSpeak({ questions, onFinish }) {
+     timerRef.current = timer;
+   }
+ 
+-  function startSpeak() {
+-    if (!supported) {
+-      setError("このブラウザは音声認識に対応していません（Chrome、またはEdgeでお試しください）");
++  // retypeフェーズに入った瞬間から20秒のカウントダウンを開始する
++  useEffect(() => {
++    if (phase !== "retype") return;
++    setRetypeInput("");
++    setRetypeResult(null);
++    setError("");
++    startTimer();
++    return () => {
++      if (timerRef.current) clearInterval(timerRef.current);
++    };
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, [phase, index]);
++
++  function checkRetype() {
++    if (timedOut) return;
++    if (!retypeInput.trim()) {
++      setError("英文を入力しよう");
+       return;
+     }
+-    if (timedOut) return;
+     setError("");
+-    setListening(true);
+-    setSpeakResult(null);
+-    listenOnce({
+-      onResult: (transcript) => {
+-        const result = wordMatchDetail(q.english, transcript);
+-        const passed = result.ratio >= PASS_THRESHOLD;
+-        if (passed && timerRef.current) {
+-          // 正解したのでタイマーを止める（時間切れによる失格を防ぐ）
+-          clearInterval(timerRef.current);
+-          timerRef.current = null;
+-        }
+-        if (passed) setTimedOut(false);
+-        setSpeakResult({ ...result, transcript });
+-      },
+-      onError: (err) => {
+-        setError("うまく聞き取れませんでした（" + err + "）。もう一度試そう");
+-      },
+-      onEnd: () => setListening(false),
+-    });
++    const correct = exactMatch(q.english, retypeInput);
++    const accuracy = wordAccuracy(q.english, retypeInput);
++    const passed = correct || accuracy >= PASS_THRESHOLD;
++    if (passed && timerRef.current) {
++      // 正解したのでタイマーを止める（時間切れによる失格を防ぐ）
++      clearInterval(timerRef.current);
++      timerRef.current = null;
++    }
++    setRetypeResult({ correct, accuracy, passed });
++  }
++
++  function retryRetype() {
++    startTimer();
++    setRetypeInput("");
++    setRetypeResult(null);
++    setError("");
+   }
+ 
+   function nextQuestion() {
+@@ -119,14 +108,14 @@ export default function TypeThenSpeak({ questions, onFinish }) {
+       setPhase("write");
+       setInput("");
+       setWriteResult(null);
+-      setSpeakResult(null);
++      setRetypeResult(null);
+       setError("");
+     } else {
+       onFinish(questions.length, questions.length);
+     }
+   }
+ 
+-  const speakPassed = speakResult && speakResult.ratio >= PASS_THRESHOLD && !timedOut;
++  const retypePassed = retypeResult && retypeResult.passed && !timedOut;
+ 
+   return (
+     <div>
+@@ -135,7 +124,7 @@ export default function TypeThenSpeak({ questions, onFinish }) {
+       </div>
+       <p className="muted">
+         問題 {index + 1} / {questions.length}　
+-        {phase === "write" ? "①英作文" : "②発話（80%以上・15秒以内で合格）"}
++        {phase === "write" ? "①英作文" : "②タイムアタック（80%以上・20秒以内で合格）"}
+       </p>
+ 
+       <div className="card">
+@@ -171,8 +160,8 @@ export default function TypeThenSpeak({ questions, onFinish }) {
+                     </button>
+                   )}
+                   {writeResult.correct && (
+-                    <button className="btn" onClick={goToSpeak}>
+-                      発話練習へ進む
++                    <button className="btn" onClick={goToRetype}>
++                      タイムアタックへ進む
+                     </button>
+                   )}
+                 </div>
+@@ -181,10 +170,10 @@ export default function TypeThenSpeak({ questions, onFinish }) {
+           </>
+         )}
+ 
+-        {phase === "speak" && (
++        {phase === "retype" && (
+           <>
+             <p className="muted" style={{ marginTop: 8 }}>
+-              英語は表示されません。日本語だけを見て、声に出して英語で言おう
++              英語は表示されません。日本語だけを見て、もう一度英語を入力しよう
+             </p>
+             <p
+               style={{
+@@ -196,44 +185,51 @@ export default function TypeThenSpeak({ questions, onFinish }) {
+             >
+               ⏱ 残り {timeLeft} 秒
+             </p>
+-            {timedOut && !speakPassed && (
++            <input
++              type="text"
++              value={retypeInput}
++              onChange={(e) => setRetypeInput(e.target.value)}
++              placeholder="英文を入力しよう"
++              style={{ marginTop: 8 }}
++              disabled={timedOut || retypePassed}
++            />
++            {timedOut && !retypePassed && (
+               <p style={{ color: "var(--danger, #c0392b)", fontWeight: "bold" }}>
+                 ⏰ 時間切れ！もう一度チャレンジしよう
+               </p>
+             )}
+-            {!supported && (
+-              <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>
+-                このブラウザは音声認識に対応していません（Chrome、またはEdgeでお試しください）
+-              </p>
++            {error && <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>{error}</p>}
++            {!timedOut && !retypePassed && (
++              <button className="btn" style={{ marginTop: 8 }} onClick={checkRetype}>
++                答え合わせ
++              </button>
+             )}
+-            <button
+-              className="btn"
+-              style={{ marginTop: 8 }}
+-              onClick={startSpeak}
+-              disabled={listening || !supported || timedOut}
+-            >
+-              {listening ? "🎤 聞き取り中..." : "🎤 話す"}
+-            </button>
+             {timedOut && (
+-              <button className="btn secondary" style={{ marginTop: 8, marginLeft: 8 }} onClick={restartTimer}>
+-                🔄 もう一度（15秒リセット）
++              <button className="btn secondary" style={{ marginTop: 8, marginLeft: 8 }} onClick={retryRetype}>
++                🔄 もう一度（20秒リセット）
+               </button>
+             )}
+-            {error && <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>{error}</p>}
+-            {speakResult && (
++            {retypeResult && (
+               <div style={{ marginTop: 8 }}>
+-                <p className="muted">認識結果: {speakResult.transcript}</p>
+                 <p>
+-                  一致率 {speakResult.ratio}%　
+-                  {speakPassed ? "✅ 合格！" : timedOut ? "" : "もう少し！もう一度話してみよう"}
++                  {retypeResult.correct
++                    ? "✅ 完全一致！"
++                    : `一致率 ${retypeResult.accuracy}%（正解: ${q.english}）`}
++                  {!retypeResult.correct && retypeResult.passed && "　→ 80%以上なので合格です"}
+                 </p>
+                 <div className="btn-row">
+-                  {!speakPassed && !timedOut && (
+-                    <button className="btn secondary" onClick={startSpeak}>
+-                      もう一度話す
++                  {!retypeResult.passed && !timedOut && (
++                    <button
++                      className="btn secondary"
++                      onClick={() => {
++                        setRetypeResult(null);
++                        setRetypeInput("");
++                      }}
++                    >
++                      もう一度入力する
+                     </button>
+                   )}
+-                  {speakPassed && (
++                  {retypePassed && (
+                     <button className="btn" onClick={nextQuestion}>
+                       {index + 1 < questions.length ? "次の問題へ" : "結果を見る"}
+                     </button>
+diff --git a/lib/speechRecognition.js b/lib/speechRecognition.js
+deleted file mode 100644
+index 981196c..0000000
+--- a/lib/speechRecognition.js
++++ /dev/null
+@@ -1,33 +0,0 @@
+-// ブラウザの音声認識機能（Web Speech API）の薄いラッパー。
+-// Chrome・Edge（どちらもChromiumエンジン）での動作を想定。対応していないブラウザでは isSupported が false になる。
+-export function isSpeechRecognitionSupported() {
+-  if (typeof window === "undefined") return false;
+-  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+-}
+-
+-export function listenOnce({ onResult, onError, onEnd }) {
+-  if (typeof window === "undefined") return null;
+-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+-  if (!SR) {
+-    if (onError) onError("このブラウザは音声認識に対応していません（Chrome、またはEdgeを使ってください）");
+-    return null;
+-  }
+-  const recognition = new SR();
+-  recognition.lang = "en-US";
+-  recognition.interimResults = false;
+-  recognition.maxAlternatives = 1;
+-
+-  recognition.onresult = (event) => {
+-    const transcript = event.results[0][0].transcript;
+-    if (onResult) onResult(transcript);
+-  };
+-  recognition.onerror = (event) => {
+-    if (onError) onError(event.error);
+-  };
+-  recognition.onend = () => {
+-    if (onEnd) onEnd();
+-  };
+-
+-  recognition.start();
+-  return recognition;
+-}
+diff --git a/pages/answers/[slug].js b/pages/answers/[slug].js
+index fa205c3..d3d9dad 100644
+--- a/pages/answers/[slug].js
++++ b/pages/answers/[slug].js
+@@ -4,9 +4,8 @@ const SETS = {
+   "g1-step1-answers": {
+     title: "G1 Step1　こたえ合わせ",
+     sections: [
+-      { label: "① Listening", lines: ["① 図書館", "② プール", "③ 教室", "④ 駅", "⑤ 体育館"] },
+-      { label: "② Reading", lines: ["① A", "② A", "③ A", "④ A"] },
+-      { label: "③ Writing", lines: ["① must", "② mustn't", "③ must", "④ mustn't", "⑤ must"] },
++      { label: "① Reading", lines: ["① A", "② A", "③ A", "④ A"] },
++      { label: "② Writing", lines: ["① must", "② mustn't", "③ must", "④ mustn't", "⑤ must"] },
+     ],
+   },
+   "g2-step1-answers": {
+@@ -156,7 +155,7 @@ export default function AnswerPage() {
+       <div className="header">
+         <h1>{set.title}</h1>
+       </div>
+-      {set.sections.map((sec, i) => (
++      {(set.sections || []).map((sec, i) => (
+         <div className="card" key={i}>
+           <p className="section-title">{sec.label}</p>
+           {sec.lines.map((l, j) => (
+@@ -166,6 +165,14 @@ export default function AnswerPage() {
+           ))}
+         </div>
+       ))}
++      <div
++        className="card"
++        style={{ background: "#eaf4f2", border: "1px solid #cfe0dd" }}
++      >
++        <p style={{ margin: 0, fontWeight: "bold", color: "#1F4E79" }}>
++          OKだったらアプリに戻ろう。次のステップは自動で開放されるよ！
++        </p>
++      </div>
+     </div>
+   );
+ }
+diff --git a/pages/api/unlock.js b/pages/api/unlock.js
+deleted file mode 100644
+index c10df4d..0000000
+--- a/pages/api/unlock.js
++++ /dev/null
+@@ -1,43 +0,0 @@
+-import { supabaseAdmin } from "../../lib/supabaseAdmin";
+-
+-function normalize(s) {
+-  return String(s || "")
+-    .toLowerCase()
+-    .replace(/\s+/g, "")
+-    .trim();
+-}
+-
+-export default async function handler(req, res) {
+-  if (req.method !== "POST") {
+-    res.status(405).json({ error: "Method not allowed" });
+-    return;
+-  }
+-  if (!supabaseAdmin) {
+-    res.status(500).json({ error: "Supabase未接続です（環境変数を確認してください）" });
+-    return;
+-  }
+-  const { grammar, step, code } = req.body || {};
+-  if (!grammar || !step || !code) {
+-    res.status(400).json({ ok: false, error: "合言葉を入力してください" });
+-    return;
+-  }
+-
+-  const { data, error } = await supabaseAdmin
+-    .from("unlock_codes")
+-    .select("code")
+-    .eq("grammar", grammar)
+-    .eq("step", step)
+-    .single();
+-
+-  if (error || !data) {
+-    res.status(200).json({ ok: false, error: "この授業回の合言葉が設定されていません" });
+-    return;
+-  }
+-
+-  if (normalize(data.code) !== normalize(code)) {
+-    res.status(200).json({ ok: false, error: "合言葉が違います" });
+-    return;
+-  }
+-
+-  res.status(200).json({ ok: true });
+-}
+diff --git a/pages/grammar/[id].js b/pages/grammar/[id].js
+index dba426d..f313f45 100644
+--- a/pages/grammar/[id].js
++++ b/pages/grammar/[id].js
+@@ -30,8 +30,8 @@ const STEP1_SKILLS = [
+ ];
+ 
+ const STEP2_SKILLS = [
+-  { key: "S", label: <><Icon name="headphones" /><Icon name="mic" /> ディクテーション＆シャドーイング</>, desc: "書き取って→音読する" },
+-  { key: "W", label: <><Icon name="pencil" /><Icon name="mic" /> 英作文→発話</>, desc: "書いて→日本語だけ見て話す" },
++  { key: "S", label: <><Icon name="headphones" /><Icon name="pencil" /> ディクテーション</>, desc: "音声を聞いて英文を書き取る" },
++  { key: "W", label: <><Icon name="pencil" /> 英作文（タイムアタック）</>, desc: "書いて→日本語だけ見て20秒でもう一度書く" },
+ ];
+ 
+ export default function GrammarPage() {
+@@ -74,9 +74,6 @@ export default function GrammarPage() {
+     return row ? "passed" : "none";
+   }
+ 
+-  const unlockedStep1 = progress.some((r) => r.step === 0 && r.skill === "S1" && r.status === "passed");
+-  const unlockedStep2 = progress.some((r) => r.step === 0 && r.skill === "S2" && r.status === "passed");
+-  const unlockedStep3 = progress.some((r) => r.step === 0 && r.skill === "S3" && r.status === "passed");
+   const step1Done = progress.some((r) => r.step === 1 && r.status === "passed");
+   const step2Done = progress.some((r) => r.step === 2 && r.status === "passed");
+   const step3Done = progress.some((r) => r.step === 3 && r.status === "passed");
+@@ -132,28 +129,6 @@ export default function GrammarPage() {
+ 
+   if (!session || !grammar) return null;
+ 
+-  if (!unlockedStep1) {
+-    return (
+-      <div className="page">
+-        <div className="header">
+-          <h1>
+-            {grammar}　{GRAMMAR_LABEL[grammar]}
+-          </h1>
+-          <button className="btn secondary" onClick={() => router.push("/select")}>
+-            一覧へ
+-          </button>
+-        </div>
+-        <UnlockGate
+-          grammar={grammar}
+-          step={1}
+-          onUnlocked={async () => {
+-            await saveProgress(0, "S1", "passed");
+-          }}
+-        />
+-      </div>
+-    );
+-  }
+-
+   const isStep1Writing = mode && mode.step === 1 && mode.skill === "W";
+   const isStep1Choice = mode && mode.step === 1 && (mode.skill === "L" || mode.skill === "R");
+   const isStep2Dictation = mode && mode.step === 2 && mode.skill === "S";
+@@ -204,17 +179,7 @@ export default function GrammarPage() {
+               Step2　暗記・習熟（合格ライン）
+             </p>
+             {!step1Done && <p className="muted">先にStep1を1つ終えよう</p>}
+-            {step1Done && !unlockedStep2 && (
+-              <UnlockGate
+-                grammar={grammar}
+-                step={2}
+-                inline
+-                onUnlocked={async () => {
+-                  await saveProgress(0, "S2", "passed");
+-                }}
+-              />
+-            )}
+-            {step1Done && unlockedStep2 && (
++            {step1Done && (
+               <>
+                 <p className="muted">満点・80%以上の一致で合格！何度でも挑戦しよう</p>
+                 <div className="grid">
+@@ -241,17 +206,7 @@ export default function GrammarPage() {
+               Step3　応用（ALTの先生に伝えよう）
+             </p>
+             {!step2Done && <p className="muted">先にStep2の合格が必要です</p>}
+-            {step2Done && !unlockedStep3 && (
+-              <UnlockGate
+-                grammar={grammar}
+-                step={3}
+-                inline
+-                onUnlocked={async () => {
+-                  await saveProgress(0, "S3", "passed");
+-                }}
+-              />
+-            )}
+-            {step2Done && unlockedStep3 && (
++            {step2Done && (
+               <div
+                 className="tile"
+                 style={{ maxWidth: 260 }}
+@@ -377,60 +332,6 @@ const STEP3_CONFIG = {
+   },
+ };
+ 
+-function UnlockGate({ grammar, step, onUnlocked, inline }) {
+-  const [code, setCode] = useState("");
+-  const [error, setError] = useState("");
+-  const [checking, setChecking] = useState(false);
+-
+-  async function submit() {
+-    if (!code.trim()) {
+-      setError("合言葉を入力しよう");
+-      return;
+-    }
+-    setChecking(true);
+-    setError("");
+-    try {
+-      const res = await fetch("/api/unlock", {
+-        method: "POST",
+-        headers: { "Content-Type": "application/json" },
+-        body: JSON.stringify({ grammar, step, code: code.trim() }),
+-      });
+-      const data = await res.json();
+-      if (!data.ok) {
+-        setError(data.error || "合言葉が違います");
+-        setChecking(false);
+-        return;
+-      }
+-      await onUnlocked();
+-    } catch {
+-      setError("通信エラーが発生しました");
+-      setChecking(false);
+-    }
+-  }
+-
+-  const content = (
+-    <>
+-      <p className="section-title">🔒 Step{step}の合言葉</p>
+-      <p className="muted">
+-        ワークシートのStep{step}部分に取り組み、そこで分かる合言葉を入力してから進もう。
+-      </p>
+-      <input
+-        type="text"
+-        placeholder="合言葉を入力"
+-        value={code}
+-        onChange={(e) => setCode(e.target.value)}
+-      />
+-      {error && <p style={{ color: "var(--danger, #c0392b)", fontSize: 13 }}>{error}</p>}
+-      <button className="btn" onClick={submit} disabled={checking}>
+-        {checking ? "確認中..." : "進む"}
+-      </button>
+-    </>
+-  );
+-
+-  if (inline) return <div>{content}</div>;
+-  return <div className="card">{content}</div>;
+-}
+-
+ function RulesTask({ config, onSubmit }) {
+   const [rules, setRules] = useState(["", "", "", "", ""]);
+   const [submitting, setSubmitting] = useState(false);
