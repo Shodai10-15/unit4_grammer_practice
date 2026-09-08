@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabase";
 import { getSession } from "../lib/session";
+import { parseStudentKey, CLASS_LABELS } from "../lib/classUtils";
 
 const GRAMMARS = ["U4G1", "U4G2", "U4G3", "U4G4"];
 
@@ -41,9 +42,17 @@ export default function Board() {
         .order("created_at", { ascending: false })
         .limit(20),
     ]);
-    setStudents(rosterRes.students || []);
-    setProgress(pr || []);
-    setHelps(hp || []);
+    const s = getSession();
+    const myClassNum = s ? parseStudentKey(s.seatNumber).classNum : null;
+    const allStudents = rosterRes.students || [];
+    const myClassStudents =
+      myClassNum != null
+        ? allStudents.filter((st) => parseStudentKey(st.seat_number).classNum === myClassNum)
+        : allStudents;
+    const mySeats = new Set(myClassStudents.map((st) => st.seat_number));
+    setStudents(myClassStudents);
+    setProgress((pr || []).filter((r) => mySeats.has(r.seat_number)));
+    setHelps((hp || []).filter((h) => mySeats.has(h.seat_number)));
     setLoading(false);
   }
 
@@ -65,7 +74,15 @@ export default function Board() {
   return (
     <div className="page" style={{ maxWidth: 720 }}>
       <div className="header">
-        <h1>みんなの進捗</h1>
+        <h1>
+          みんなの進捗
+          {session &&
+            (() => {
+              const { classNum } = parseStudentKey(session.seatNumber);
+              const label = CLASS_LABELS[classNum] ?? `${classNum}組`;
+              return <span style={{ fontSize: 16, marginLeft: 8 }}>（{label}）</span>;
+            })()}
+        </h1>
         <button className="btn secondary" onClick={() => router.push("/select")}>
           自分の画面へ
         </button>

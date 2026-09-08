@@ -259,18 +259,14 @@ const ANSWER_CHECK_CONFIG = {
 const HINT_BUTTON_LABELS = ["ヒント①を見る（語順）", "ヒント②を見る（文法）", "ヒント③を見る（つなぎ言葉）"];
 
 function AnswerCheckPanel({ config }) {
-  const [open, setOpen] = useState(false);
+  const [hintsOpen, setHintsOpen] = useState(false);
+  const [answersOpen, setAnswersOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState({}); // "stepKey-sectionIdx-itemIdx" -> bool
-  const [answerOpen, setAnswerOpen] = useState({}); // 同上 -> bool（答え本体を見るか）
   const [hintLevel, setHintLevel] = useState({}); // 同上 -> 表示済みヒント数（0〜3）
   if (!config) return null;
 
   function toggleDetail(key) {
     setDetailOpen((prev) => ({ ...prev, [key]: !prev[key] }));
-  }
-
-  function toggleAnswer(key) {
-    setAnswerOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
   function revealNextHint(key, max) {
@@ -281,16 +277,23 @@ function AnswerCheckPanel({ config }) {
     setHintLevel((prev) => ({ ...prev, [key]: 0 }));
   }
 
+  const showContent = hintsOpen || answersOpen;
+
   return (
     <div className="card">
       <p className="section-title">📖 紙のワークシートのヒント・答え合わせ</p>
       <p className="muted">
-        ワークシートで困ったらヒントを、答え合わせをしたいときは答えを見よう（ワークシートが基本！まずは自分で解いてから見よう）
+        まずはワークシートを自分で解いてから見よう（ワークシートが基本！）。困ったときはヒントだけ、確認したいときは答え合わせを使おう
       </p>
-      <button className="btn secondary" onClick={() => setOpen((o) => !o)}>
-        {open ? "閉じる" : "ヒント・答え合わせを見る"}
-      </button>
-      {open && (
+      <div className="btn-row">
+        <button className="btn secondary" onClick={() => setHintsOpen((o) => !o)}>
+          {hintsOpen ? "ヒントを閉じる" : "💡 ヒントを見る"}
+        </button>
+        <button className="btn secondary" onClick={() => setAnswersOpen((o) => !o)}>
+          {answersOpen ? "答え合わせを閉じる" : "✅ 答え合わせを見る"}
+        </button>
+      </div>
+      {showContent && (
         <div style={{ marginTop: 10 }}>
           {["step1", "step2"].map((stepKey) =>
             config[stepKey] ? (
@@ -301,7 +304,7 @@ function AnswerCheckPanel({ config }) {
                 {config[stepKey].sections.map((sec, i) => (
                   <div key={i} style={{ marginBottom: 8 }}>
                     <p style={{ fontWeight: "bold", margin: "4px 0" }}>{sec.label}</p>
-                    {sec.orderNote && (
+                    {answersOpen && sec.orderNote && (
                       <p
                         className="muted"
                         style={{
@@ -318,8 +321,9 @@ function AnswerCheckPanel({ config }) {
                     {sec.items.map((it, j) => {
                       const itemKey = `${stepKey}-${i}-${j}`;
                       const isDetailOpen = !!detailOpen[itemKey];
-                      const isAnswerOpen = !!answerOpen[itemKey];
                       const level = hintLevel[itemKey] || 0;
+                      const hasHints = it.hints && it.hints.length > 0;
+                      if (!(hintsOpen && hasHints) && !answersOpen) return null;
                       return (
                         <div
                           key={j}
@@ -329,7 +333,7 @@ function AnswerCheckPanel({ config }) {
                             borderBottom: "1px dashed #dce6e4",
                           }}
                         >
-                          {it.hints && it.hints.length > 0 && (
+                          {hintsOpen && hasHints && (
                             <div style={{ marginBottom: 6 }}>
                               <p style={{ margin: "0 0 4px 0", fontWeight: "bold", fontSize: 13 }}>
                                 💡 ワークシートのヒントはこちら！
@@ -373,15 +377,7 @@ function AnswerCheckPanel({ config }) {
                             </div>
                           )}
 
-                          <button
-                            className="btn secondary"
-                            style={{ fontSize: 12, padding: "3px 10px", marginBottom: 4 }}
-                            onClick={() => toggleAnswer(itemKey)}
-                          >
-                            {isAnswerOpen ? "答えを隠す" : "✅ 答えを見る"}
-                          </button>
-
-                          {isAnswerOpen && (
+                          {answersOpen && (
                             <div>
                               <p style={{ margin: "2px 0" }}>{it.a}</p>
                               {it.note && (
