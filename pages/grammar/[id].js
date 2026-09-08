@@ -178,75 +178,75 @@ const ANSWER_CHECK_CONFIG = {
             "英語は　誰は／どうする／（何を）／（どこ）／（いつ）　の順番に並べます。日本語と語順が違うところに注目しよう。",
           items: [
             {
-              a: "① You don't have to go to school today.",
-              note: "「〜する必要はない」＝don't have to＋動詞の原形。",
-              breakdown: [
-                { role: "誰は", jp: "（あなたは）", en: "You" },
-                { role: "どうする", jp: "行く必要はない", en: "don't have to go" },
-                { role: "どこ", jp: "学校に", en: "to school" },
-                { role: "いつ", jp: "今日は", en: "today" },
-              ],
-              hints: [
-                "語順は「（あなたは）／行く必要はない／学校に／今日は」の順だよ！",
-                "「〜する必要はない」なのでdon't have toを使うよ。",
-                "「〜へ」は to を使うよ（to school）。",
-              ],
-            },
-            {
-              a: "② We have to take an umbrella.",
+              a: "① I have to clean my room every day.",
               note: "「〜する必要がある」＝have to＋動詞の原形。",
               breakdown: [
-                { role: "誰は", jp: "私たちは", en: "We" },
-                { role: "どうする", jp: "持っていく必要がある", en: "have to take" },
-                { role: "何を", jp: "傘を", en: "an umbrella" },
+                { role: "誰は", jp: "私は", en: "I" },
+                { role: "どうする", jp: "掃除する必要がある", en: "have to clean" },
+                { role: "何を", jp: "部屋を", en: "my room" },
+                { role: "いつ", jp: "毎日", en: "every day" },
               ],
               hints: [
-                "語順は「私たちは／持っていく必要がある／傘を」の順だよ！",
+                "語順は「私は／掃除する必要がある／部屋を／毎日」の順だよ！",
                 "「〜する必要がある」なのでhave toを使うよ。",
-                "「持っていく」は take を使うよ（take an umbrella）。",
+                "「毎日」は every day。頻度を表す言葉は文の最後につけよう。",
               ],
             },
             {
-              a: "③ She doesn't have to wake up early on Sundays.",
-              note: "主語が三人称単数なのでdoesn't have to。",
-              breakdown: [
-                { role: "誰は", jp: "彼女は", en: "She" },
-                { role: "どうする", jp: "早起きする必要はない", en: "doesn't have to wake up early" },
-                { role: "いつ", jp: "毎週日曜日に", en: "on Sundays" },
-              ],
-              hints: [
-                "語順は「彼女は／早起きする必要はない／毎週日曜日に」の順だよ！",
-                "主語が三人称単数（She）なのでdoesn't have toを使うよ。",
-                "曜日には on を使うよ（on Sundays）。",
-              ],
-            },
-            {
-              a: "④ We have to wear helmets when we ride bikes.",
-              note: "「〜するときは」＝when we ride bikesを後ろに置く。",
-              breakdown: [
-                { role: "誰は", jp: "私たちは", en: "We" },
-                { role: "どうする", jp: "かぶる必要がある", en: "have to wear" },
-                { role: "何を", jp: "ヘルメットを", en: "helmets" },
-                { role: "いつ", jp: "自転車に乗るときは", en: "when we ride bikes" },
-              ],
-              hints: [
-                "語順は「私たちは／かぶる必要がある／ヘルメットを／自転車に乗るときは」の順だよ！",
-                "「〜する必要がある」なのでhave toを使うよ。",
-                "「〜するときは」は when を使って文の後ろにつなげよう（when we ride bikes）。",
-              ],
-            },
-            {
-              a: "⑤ You don't have to take this test.",
+              a: "② You don't have to leave right now.",
               note: "「〜する必要はない」＝don't have to＋動詞の原形。",
               breakdown: [
-                { role: "誰は", jp: "（あなたは）", en: "You" },
-                { role: "どうする", jp: "受ける必要はない", en: "don't have to take" },
-                { role: "何を", jp: "このテストを", en: "this test" },
+                { role: "誰は", jp: "あなたは", en: "You" },
+                { role: "どうする", jp: "出発する必要はない", en: "don't have to leave" },
+                { role: "いつ", jp: "今すぐ", en: "right now" },
               ],
               hints: [
-                "語順は「（あなたは）／受ける必要はない／このテストを」の順だよ！",
+                "語順は「あなたは／出発する必要はない／今すぐ」の順だよ！",
                 "「〜する必要はない」なのでdon't have toを使うよ。",
-                "「受ける」は take を使うよ（take this test）。",
+                "「今すぐ」は right now。時を表す言葉は文の最後につけよう。",
+              ],
+            },
+            {
+              a: "③ He has to make his own lunch every morning.",
+              note: "主語が三人称単数なのでhas to。",
+              breakdown: [
+                { role: "誰は", jp: "彼は", en: "He" },
+                { role: "どうする", jp: "作る必要がある", en: "has to make" },
+                { role: "何を", jp: "自分の弁当を", en: "his own lunch" },
+                { role: "いつ", jp: "毎朝", en: "every morning" },
+              ],
+              hints: [
+                "語順は「彼は／作る必要がある／自分の弁当を／毎朝」の順だよ！",
+                "主語が三人称単数（He）なのでhas toを使うよ。",
+                "「自分の」は his own。「毎朝」は every morning。",
+              ],
+            },
+            {
+              a: "④ We don't have to attend the meeting.",
+              note: "「〜する必要はない」＝don't have to＋動詞の原形。",
+              breakdown: [
+                { role: "誰は", jp: "私たちは", en: "We" },
+                { role: "どうする", jp: "出席する必要はない", en: "don't have to attend" },
+                { role: "何を", jp: "その会議に", en: "the meeting" },
+              ],
+              hints: [
+                "語順は「私たちは／出席する必要はない／その会議に」の順だよ！",
+                "「〜する必要はない」なのでdon't have toを使うよ。",
+                "「出席する」は attend。「〜に出席する」でも前置詞は不要だよ（attend the meeting）。",
+              ],
+            },
+            {
+              a: "⑤ She has to help with the homework.",
+              note: "主語が三人称単数なのでhas to。",
+              breakdown: [
+                { role: "誰は", jp: "彼女は", en: "She" },
+                { role: "どうする", jp: "手伝う必要がある", en: "has to help" },
+                { role: "何を", jp: "宿題を", en: "with the homework" },
+              ],
+              hints: [
+                "語順は「彼女は／手伝う必要がある／宿題を」の順だよ！",
+                "主語が三人称単数（She）なのでhas toを使うよ。",
+                "「〜を手伝う」は help with 〜。withを忘れずに！",
               ],
             },
           ],
