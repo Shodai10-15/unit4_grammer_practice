@@ -73,11 +73,6 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "どうする", jp: "起きなければならない", en: "must get up" },
                 { role: "いつ", jp: "毎朝6時に", en: "at six every morning" },
               ],
-              hints: [
-                "語順は「私は／起きなければならない／毎朝6時に」の順だよ！",
-                "「〜しなければならない」なのでmustを使うよ。",
-                "時刻には at を使うよ（at six）。「毎朝」は every morning。",
-              ],
             },
             {
               a: "② You mustn't take pictures here.",
@@ -88,11 +83,6 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "何を", jp: "写真を", en: "pictures" },
                 { role: "どこ", jp: "ここで", en: "here" },
               ],
-              hints: [
-                "語順は「（あなたは）／撮ってはいけない／写真を／ここで」の順だよ！",
-                "「〜してはいけない」なのでmustn'tを使うよ。",
-                "「ここで」は here。場所を表す言葉は文の最後につけよう。",
-              ],
             },
             {
               a: "③ We mustn't run in the hallway.",
@@ -101,11 +91,6 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "誰は", jp: "私たちは", en: "We" },
                 { role: "どうする", jp: "走ってはいけない", en: "mustn't run" },
                 { role: "どこ", jp: "廊下で", en: "in the hallway" },
-              ],
-              hints: [
-                "語順は「私たちは／走ってはいけない／廊下で」の順だよ！",
-                "主語がWeでもmustn'tの形は変わらないよ。",
-                "「廊下を」だけど、英語では「廊下の中で」というイメージで in the hallway だよ。",
               ],
             },
             {
@@ -117,11 +102,6 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "何を", jp: "この本を", en: "this book" },
                 { role: "いつ", jp: "今日", en: "today" },
               ],
-              hints: [
-                "語順は「彼は／返さなければならない／この本を／今日」の順だよ！",
-                "主語が三人称でもmustはそのままmustだよ。",
-                "「今日」は today。時を表す言葉は文の最後につけよう。",
-              ],
             },
             {
               a: "⑤ You mustn't use your phone during class.",
@@ -131,11 +111,6 @@ const ANSWER_CHECK_CONFIG = {
                 { role: "どうする", jp: "使ってはいけない", en: "mustn't use" },
                 { role: "何を", jp: "スマホを", en: "your phone" },
                 { role: "いつ", jp: "授業中に", en: "during class" },
-              ],
-              hints: [
-                "語順は「（あなたは）／使ってはいけない／スマホを／授業中に」の順だよ！",
-                "「授業中は〜してはいけない」なのでmustn'tを使うよ。",
-                "「〜の間」は during を使うよ（during class）。",
               ],
             },
           ],
@@ -193,60 +168,60 @@ const ANSWER_CHECK_CONFIG = {
               ],
             },
             {
-              a: "② You don't have to leave right now.",
+              a: "② You don't have to leave now.",
               note: "「〜する必要はない」＝don't have to＋動詞の原形。",
               breakdown: [
                 { role: "誰は", jp: "あなたは", en: "You" },
                 { role: "どうする", jp: "出発する必要はない", en: "don't have to leave" },
-                { role: "いつ", jp: "今すぐ", en: "right now" },
+                { role: "いつ", jp: "今", en: "now" },
               ],
               hints: [
-                "語順は「あなたは／出発する必要はない／今すぐ」の順だよ！",
+                "語順は「あなたは／出発する必要はない／今」の順だよ！",
                 "「〜する必要はない」なのでdon't have toを使うよ。",
-                "「今すぐ」は right now。時を表す言葉は文の最後につけよう。",
+                "「今」は now。時を表す言葉は文の最後につけよう。",
               ],
             },
             {
-              a: "③ He has to make his own lunch every morning.",
+              a: "③ He has to make his lunch every morning.",
               note: "主語が三人称単数なのでhas to。",
               breakdown: [
                 { role: "誰は", jp: "彼は", en: "He" },
                 { role: "どうする", jp: "作る必要がある", en: "has to make" },
-                { role: "何を", jp: "自分の弁当を", en: "his own lunch" },
+                { role: "何を", jp: "彼の弁当を", en: "his lunch" },
                 { role: "いつ", jp: "毎朝", en: "every morning" },
               ],
               hints: [
-                "語順は「彼は／作る必要がある／自分の弁当を／毎朝」の順だよ！",
+                "語順は「彼は／作る必要がある／彼の弁当を／毎朝」の順だよ！",
                 "主語が三人称単数（He）なのでhas toを使うよ。",
-                "「自分の」は his own。「毎朝」は every morning。",
+                "「彼の」は his。「毎朝」は every morning。",
               ],
             },
             {
-              a: "④ We don't have to attend the meeting.",
+              a: "④ We don't have to go to the meeting.",
               note: "「〜する必要はない」＝don't have to＋動詞の原形。",
               breakdown: [
                 { role: "誰は", jp: "私たちは", en: "We" },
-                { role: "どうする", jp: "出席する必要はない", en: "don't have to attend" },
-                { role: "何を", jp: "その会議に", en: "the meeting" },
+                { role: "どうする", jp: "行く必要はない", en: "don't have to go" },
+                { role: "どこ", jp: "その会議に", en: "to the meeting" },
               ],
               hints: [
-                "語順は「私たちは／出席する必要はない／その会議に」の順だよ！",
+                "語順は「私たちは／行く必要はない／その会議に」の順だよ！",
                 "「〜する必要はない」なのでdon't have toを使うよ。",
-                "「出席する」は attend。「〜に出席する」でも前置詞は不要だよ（attend the meeting）。",
+                "「〜に行く」は go to 〜。toを忘れずに！",
               ],
             },
             {
-              a: "⑤ She has to help with the homework.",
+              a: "⑤ She has to finish her homework.",
               note: "主語が三人称単数なのでhas to。",
               breakdown: [
                 { role: "誰は", jp: "彼女は", en: "She" },
-                { role: "どうする", jp: "手伝う必要がある", en: "has to help" },
-                { role: "何を", jp: "宿題を", en: "with the homework" },
+                { role: "どうする", jp: "終える必要がある", en: "has to finish" },
+                { role: "何を", jp: "宿題を", en: "her homework" },
               ],
               hints: [
-                "語順は「彼女は／手伝う必要がある／宿題を」の順だよ！",
+                "語順は「彼女は／終える必要がある／宿題を」の順だよ！",
                 "主語が三人称単数（She）なのでhas toを使うよ。",
-                "「〜を手伝う」は help with 〜。withを忘れずに！",
+                "「終える」は finish。前置詞は不要だよ（finish her homework）。",
               ],
             },
           ],
