@@ -1,0 +1,24 @@
+diff --git a/pages/answers/[slug].js b/pages/answers/[slug].js
+index d3d9dad..c151c09 100644
+--- a/pages/answers/[slug].js
++++ b/pages/answers/[slug].js
+@@ -4,7 +4,7 @@ const SETS = {
+   "g1-step1-answers": {
+     title: "G1 Step1　こたえ合わせ",
+     sections: [
+-      { label: "① Reading", lines: ["① A", "② A", "③ A", "④ A"] },
++      { label: "① Reading", lines: ["① B", "② D", "③ A", "④ C"] },
+       { label: "② Writing", lines: ["① must", "② mustn't", "③ must", "④ mustn't", "⑤ must"] },
+     ],
+   },
+@@ -12,8 +12,8 @@ const SETS = {
+     title: "G2 Step1　こたえ合わせ",
+     sections: [
+       { label: "① Listening", lines: ["① 掃除", "② 宿題", "③ 買い物", "④ 練習", "⑤ 会議"] },
+-      { label: "② Reading", lines: ["① A", "② A", "③ A", "④ A"] },
+-      { label: "③ Writing", lines: ["① have to", "② don't have to", "③ has to", "④ don't have to", "⑤ has to"] },
++      { label: "② Reading", lines: ["① C", "② A", "③ D", "④ B"] },
++      { label: "③ Writing", lines: ["① don't have to", "② have to", "③ don't have to", "④ doesn't have to", "⑤ have to"] },
+     ],
+   },
+   "g3-step1-answers": {
