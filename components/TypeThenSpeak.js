@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { wordAccuracy, exactMatch, missingWords } from "../lib/textSimilarity";
+import AskAIButton from "./AskAIButton";
 
 const PASS_THRESHOLD = 80;
 const TIME_LIMIT_SEC = 20;
@@ -158,6 +159,9 @@ export default function TypeThenSpeak({ questions, onFinish }) {
                     💡 この単語を使おう！：{missingWords(q.english, input).join("、")}
                   </p>
                 )}
+                {!writeResult.correct && (
+                  <AskAIButton japanese={q.japanese} correct={q.english} userInput={input} />
+                )}
                 <div className="btn-row">
                   {!writeResult.correct && (
                     <button className="btn secondary" onClick={retryWrite}>
@@ -226,6 +230,9 @@ export default function TypeThenSpeak({ questions, onFinish }) {
                       💡 この単語を使おう！：{missingWords(q.english, retypeInput).join("、")}
                     </p>
                   )}
+                {!retypeResult.correct && !retypeResult.passed && !timedOut && (
+                  <AskAIButton japanese={q.japanese} correct={q.english} userInput={retypeInput} />
+                )}
                 <div className="btn-row">
                   {!retypeResult.passed && !timedOut && (
                     <button
