@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { normalize } from "../lib/textSimilarity";
 
 // questions: [{id, question, correct, note}]
@@ -12,6 +12,9 @@ export default function TypedBlank({ questions, onFinish }) {
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [error, setError] = useState("");
+  // 間違えた問題のidを覚えておき、終了時に親へ渡す
+  // （「間違えた問題だけもう一度挑戦する」機能のため）
+  const wrongIdsRef = useRef([]);
 
   const q = questions[index];
   const parts = q.question.split("___");
@@ -35,7 +38,11 @@ export default function TypedBlank({ questions, onFinish }) {
     );
     setIsCorrect(correct);
     setAnswered(true);
-    if (correct) setScore((s) => s + 1);
+    if (correct) {
+      setScore((s) => s + 1);
+    } else {
+      wrongIdsRef.current.push(q.id);
+    }
   }
 
   function next() {
@@ -45,7 +52,7 @@ export default function TypedBlank({ questions, onFinish }) {
       setAnswered(false);
       setError("");
     } else {
-      onFinish(score, questions.length);
+      onFinish(score, questions.length, wrongIdsRef.current);
     }
   }
 

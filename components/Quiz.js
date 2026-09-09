@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import AudioPlayer from "./AudioPlayer";
 
 function shuffle(arr) {
@@ -20,6 +20,9 @@ export default function Quiz({ questions, onFinish, audioMode, instructionText }
   const [selected, setSelected] = useState(null);
   const [answered, setAnswered] = useState(false);
   const [score, setScore] = useState(0);
+  // 間違えた問題のidを覚えておき、終了時に親へ渡す
+  // （「間違えた問題だけもう一度挑戦する」機能のため）
+  const wrongIdsRef = useRef([]);
 
   const q = questions[index];
 
@@ -39,7 +42,11 @@ export default function Quiz({ questions, onFinish, audioMode, instructionText }
     if (answered) return;
     setSelected(letter);
     setAnswered(true);
-    if (letter === q.correct) setScore((s) => s + 1);
+    if (letter === q.correct) {
+      setScore((s) => s + 1);
+    } else {
+      wrongIdsRef.current.push(q.id);
+    }
   }
 
   function next() {
@@ -48,7 +55,7 @@ export default function Quiz({ questions, onFinish, audioMode, instructionText }
       setSelected(null);
       setAnswered(false);
     } else {
-      onFinish(score, questions.length);
+      onFinish(score, questions.length, wrongIdsRef.current);
     }
   }
 

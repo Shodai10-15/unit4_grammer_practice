@@ -416,7 +416,10 @@ export default function GrammarPage() {
   const [mode, setMode] = useState(null); // {step, skill} or null = menu
   const [questions, setQuestions] = useState([]);
   const [loadingQ, setLoadingQ] = useState(false);
-  const [result, setResult] = useState(null); // {score,total}
+  const [result, setResult] = useState(null); // {score,total,wrongIds}
+  // その回の最初の問題数（間違えた問題だけに絞って再挑戦しても、
+  // 全部正解できたときは元の問題数で合格を記録するために覚えておく）
+  const [originalTotal, setOriginalTotal] = useState(null);
 
   useEffect(() => {
     const s = getSession();
@@ -455,6 +458,7 @@ export default function GrammarPage() {
   async function startQuiz(step, skill) {
     setLoadingQ(true);
     setResult(null);
+    setOriginalTotal(null);
     const { data } = await supabase
       .from("quiz_questions")
       .select("*")
@@ -487,12 +491,35 @@ export default function GrammarPage() {
     loadProgress();
   }
 
-  async function handleQuizFinish(score, total) {
+  async function handleQuizFinish(score, total, wrongIds) {
     const { step, skill } = mode;
-    setResult({ score, total });
-    // Step1・Step2ともに満点（100%）で合格。届かなければ再挑戦を促す。
+    setResult({ score, total, wrongIds: wrongIds || [] });
+    // その回の問題数を覚えておく（間違えた問題だけの再挑戦で全部正解しても、
+    // 最初の問題数を合格記録として使うため）。すでに覚えていれば上書きしない。
+    const effectiveTotal = originalTotal ?? total;
+    if (originalTotal == null) setOriginalTotal(total);
+    // Step1・Step2ともに、その回の問題を全問正解したら合格。届かなければ再挑戦を促す。
     const passLine = score === total;
-    await saveProgress(step, skill, passLine ? "passed" : "in_progress", score, total);
+    await saveProgress(
+      step,
+      skill,
+      passLine ? "passed" : "in_progress",
+      passLine ? effectiveTotal : score,
+      passLine ? effectiveTotal : total
+    );
+  }
+
+  // 間違えた問題だけに絞って再挑戦する（一から全問やり直しにしない）
+  function retryWrongOnly() {
+    const wrongSet = new Set((result && result.wrongIds) || []);
+    const subset = questions.filter((q) => wrongSet.has(q.id));
+    if (subset.length === 0) {
+      // 万一絞り込めない場合は従来通り全問やり直し
+      startQuiz(mode.step, mode.skill);
+      return;
+    }
+    setQuestions(subset);
+    setResult(null);
   }
 
   function backToMenu() {
@@ -683,8 +710,13 @@ export default function GrammarPage() {
           )}
           <div className="btn-row">
             {mode.step !== 3 && result.score !== result.total && (
-              <button className="btn" onClick={() => startQuiz(mode.step, mode.skill)}>
-                もう一度挑戦する
+              <button className="btn" onClick={retryWrongOnly}>
+                間違えた問題だけもう一度挑戦する
+              </button>
+            )}
+            {mode.step !== 3 && result.score !== result.total && (
+              <button className="btn secondary" onClick={() => startQuiz(mode.step, mode.skill)}>
+                全問やり直す
               </button>
             )}
             <button className="btn secondary" onClick={backToMenu}>
