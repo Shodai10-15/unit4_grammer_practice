@@ -73,7 +73,7 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
   // 答え合わせのたびにquiz_attemptsへ1件記録する（正解・不正解どちらも）。
   // 生徒の画面には影響しない裏側のログで、失敗しても学習の流れを止めないよう
   // 結果を待たずに投げっぱなしにする。
-  function logAttempt(phase, correct, accuracy) {
+  function logAttempt(phase, correct, accuracy, cooldownTriggered) {
     if (!supabase || !seatNumber || !grammar) return;
     supabase
       .from("quiz_attempts")
@@ -87,6 +87,7 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
         correct,
         accuracy,
         hint_mode: hintMode,
+        cooldown_triggered: !!cooldownTriggered,
       })
       .then(() => {})
       .catch(() => {
@@ -124,16 +125,15 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
     cooldownTimerRef.current = timer;
   }
 
+  // 正誤の判定と同時に、クールダウンが発動するかどうかを同期的に計算する
+  // （setStateの非同期更新に頼ると「発動した瞬間の1件」をログに正しく
+  // 印付けできないため、現在のwrongStreakから直接計算する）。
   function registerResult(passed) {
-    if (passed) {
-      setWrongStreak(0);
-      return;
-    }
-    setWrongStreak((prev) => {
-      const next = prev + 1;
-      if (next >= COOLDOWN_THRESHOLD) startCooldown();
-      return next;
-    });
+    const nextStreak = passed ? 0 : wrongStreak + 1;
+    const willCooldown = !passed && nextStreak >= COOLDOWN_THRESHOLD;
+    setWrongStreak(nextStreak);
+    if (willCooldown) startCooldown();
+    return willCooldown;
   }
 
   function checkWrite() {
@@ -145,8 +145,8 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
     const correct = exactMatch(q.english, input);
     const accuracy = wordAccuracy(q.english, input);
     setWriteResult({ correct, accuracy });
-    logAttempt("write", correct, accuracy);
-    registerResult(correct);
+    const willCooldown = registerResult(correct);
+    logAttempt("write", correct, accuracy, willCooldown);
   }
 
   function goToRetype() {
@@ -208,8 +208,8 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
       timerRef.current = null;
     }
     setRetypeResult({ correct, accuracy, passed });
-    logAttempt("retype", correct, accuracy);
-    registerResult(passed);
+    const willCooldown = registerResult(passed);
+    logAttempt("retype", correct, accuracy, willCooldown);
   }
 
   function retryRetype() {
