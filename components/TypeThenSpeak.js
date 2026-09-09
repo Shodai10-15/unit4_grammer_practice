@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { wordAccuracy, exactMatch, missingWords } from "../lib/textSimilarity";
 import AskAIButton from "./AskAIButton";
+import { supabase } from "../lib/supabase";
 
 const PASS_THRESHOLD = 80;
 const TIME_LIMIT_SEC = 20;
@@ -11,7 +12,10 @@ const TIME_LIMIT_SEC = 20;
 //            タイマーが動き、時間内に合格ラインに届かないと「時間切れ」になる）
 // ※教室では音声認識（マイク入力）が雑音で安定しないため、発話チェックの代わりに
 //   タイムアタック形式のタイピングチェックを行う
-export default function TypeThenSpeak({ questions, onFinish }) {
+//
+// grammar/step/skill/seatNumber: 集計用にquiz_attemptsへ1回の答え合わせごとに
+// ログを残すために必要（間違えた回数・ヒントモード使用有無を後で分析するため）。
+export default function TypeThenSpeak({ questions, onFinish, grammar, step, skill, seatNumber }) {
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState("write");
   const [input, setInput] = useState("");
@@ -49,6 +53,30 @@ export default function TypeThenSpeak({ questions, onFinish }) {
   const q = questions[index];
   const hintOrder = q && Array.isArray(q.hintOrder) ? q.hintOrder : [];
 
+  // 答え合わせのたびにquiz_attemptsへ1件記録する（正解・不正解どちらも）。
+  // 生徒の画面には影響しない裏側のログで、失敗しても学習の流れを止めないよう
+  // 結果を待たずに投げっぱなしにする。
+  function logAttempt(phase, correct, accuracy) {
+    if (!supabase || !seatNumber || !grammar) return;
+    supabase
+      .from("quiz_attempts")
+      .insert({
+        seat_number: seatNumber,
+        grammar,
+        step: step ?? null,
+        skill: skill || null,
+        question_id: q?.id ?? null,
+        phase,
+        correct,
+        accuracy,
+        hint_mode: hintMode,
+      })
+      .then(() => {})
+      .catch(() => {
+        // ログの失敗で学習体験を止めないよう、ここでは何もしない
+      });
+  }
+
   function checkWrite() {
     if (!input.trim()) {
       setError("英文を入力しよう");
@@ -58,6 +86,7 @@ export default function TypeThenSpeak({ questions, onFinish }) {
     const correct = exactMatch(q.english, input);
     const accuracy = wordAccuracy(q.english, input);
     setWriteResult({ correct, accuracy });
+    logAttempt("write", correct, accuracy);
   }
 
   function goToRetype() {
@@ -117,6 +146,7 @@ export default function TypeThenSpeak({ questions, onFinish }) {
       timerRef.current = null;
     }
     setRetypeResult({ correct, accuracy, passed });
+    logAttempt("retype", correct, accuracy);
   }
 
   function retryRetype() {

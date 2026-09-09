@@ -639,7 +639,14 @@ export default function GrammarPage() {
       )}
 
       {isStep2TypeSpeak && questions.length > 0 && !result && (
-        <TypeThenSpeak questions={typeSpeakQuestions} onFinish={handleQuizFinish} />
+        <TypeThenSpeak
+          questions={typeSpeakQuestions}
+          onFinish={handleQuizFinish}
+          grammar={grammar}
+          step={mode.step}
+          skill={mode.skill}
+          seatNumber={session.seatNumber}
+        />
       )}
 
       {mode && mode.step === 3 && !result && STEP3_CONFIG[grammar] && (
