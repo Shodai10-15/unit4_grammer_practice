@@ -5,6 +5,10 @@ import { supabase } from "../lib/supabase";
 
 const PASS_THRESHOLD = 80;
 const TIME_LIMIT_SEC = 20;
+// 同じ問題（同じフェーズ）で連続してこの回数不正解になったら、
+// 一度ワークシートに戻るよう促すクールダウンに入る。
+const COOLDOWN_THRESHOLD = 3;
+const COOLDOWN_SEC = 60;
 
 // questions: [{id, japanese, english}]
 // フェーズ: write（日本語を見て英作文をタイプ、時間制限なし）
@@ -28,7 +32,12 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
   // ヒントモード：ONにすると日本語を英語の語順に並べ替えて表示する（難しい生徒向け）
   // 端末に保存して次回も覚えておく
   const [hintMode, setHintMode] = useState(false);
+  // 同じ問題・同じフェーズでの連続不正解カウントと、クールダウン残り秒数
+  // （0のときは非アクティブ）。
+  const [wrongStreak, setWrongStreak] = useState(0);
+  const [cooldownLeft, setCooldownLeft] = useState(0);
   const timerRef = useRef(null);
+  const cooldownTimerRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -36,6 +45,14 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
     } catch {
       // localStorageが使えない環境では何もしない
     }
+  }, []);
+
+  // アンマウント時に両方のタイマーを止める
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+    };
   }, []);
 
   function toggleHintMode() {
@@ -77,6 +94,48 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
       });
   }
 
+  // 連続不正解がCOOLDOWN_THRESHOLDに達したら60秒のクールダウンに入る。
+  // その間はチャレンジのボタンの代わりに「ワークシートに戻ろう」の案内を表示する。
+  function startCooldown() {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+    setCooldownLeft(COOLDOWN_SEC);
+    const start = performance.now();
+    const timer = setInterval(() => {
+      const elapsed = (performance.now() - start) / 1000;
+      const remaining = Math.max(0, Math.ceil(COOLDOWN_SEC - elapsed));
+      setCooldownLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(timer);
+        cooldownTimerRef.current = null;
+        setWrongStreak(0);
+        setError("");
+        if (phase === "retype") {
+          retryRetype();
+        } else {
+          setWriteResult(null);
+          setInput("");
+        }
+      }
+    }, 200);
+    cooldownTimerRef.current = timer;
+  }
+
+  function registerResult(passed) {
+    if (passed) {
+      setWrongStreak(0);
+      return;
+    }
+    setWrongStreak((prev) => {
+      const next = prev + 1;
+      if (next >= COOLDOWN_THRESHOLD) startCooldown();
+      return next;
+    });
+  }
+
   function checkWrite() {
     if (!input.trim()) {
       setError("英文を入力しよう");
@@ -87,12 +146,15 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
     const accuracy = wordAccuracy(q.english, input);
     setWriteResult({ correct, accuracy });
     logAttempt("write", correct, accuracy);
+    registerResult(correct);
   }
 
   function goToRetype() {
     setPhase("retype");
     setWriteResult(null);
     setInput("");
+    setWrongStreak(0);
+    setCooldownLeft(0);
   }
 
   function retryWrite() {
@@ -147,6 +209,7 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
     }
     setRetypeResult({ correct, accuracy, passed });
     logAttempt("retype", correct, accuracy);
+    registerResult(passed);
   }
 
   function retryRetype() {
@@ -158,6 +221,12 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
 
   function nextQuestion() {
     if (timerRef.current) clearInterval(timerRef.current);
+    if (cooldownTimerRef.current) {
+      clearInterval(cooldownTimerRef.current);
+      cooldownTimerRef.current = null;
+    }
+    setWrongStreak(0);
+    setCooldownLeft(0);
     if (index + 1 < questions.length) {
       setIndex(index + 1);
       setPhase("write");
@@ -213,7 +282,29 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
           </p>
         )}
 
-        {phase === "write" && (
+        {cooldownLeft > 0 && (
+          <div
+            style={{
+              marginTop: 12,
+              background: "#fff4e5",
+              border: "1px solid #f0c987",
+              borderRadius: 10,
+              padding: "12px 14px",
+            }}
+          >
+            <p style={{ margin: "0 0 4px 0", fontWeight: "bold" }}>
+              📝 一度ワークシートに戻ろう
+            </p>
+            <p className="muted" style={{ fontSize: 14, margin: "0 0 8px 0" }}>
+              まだこの英文が定着していないみたい。紙のワークシートに、この英文をもう一度書いてみよう。
+            </p>
+            <p style={{ fontSize: 22, fontWeight: "bold", margin: 0 }}>
+              ⏱ あと {cooldownLeft} 秒
+            </p>
+          </div>
+        )}
+
+        {cooldownLeft === 0 && phase === "write" && (
           <>
             <input
               type="text"
@@ -261,7 +352,7 @@ export default function TypeThenSpeak({ questions, onFinish, grammar, step, skil
           </>
         )}
 
-        {phase === "retype" && (
+        {cooldownLeft === 0 && phase === "retype" && (
           <>
             <p className="muted" style={{ marginTop: 8 }}>
               英語は表示されません。日本語だけを見て、もう一度英語を入力しよう
